@@ -1,0 +1,6 @@
+node_modules/
+.env
+*.log
+.chrome-debug/
+chrome-profile/
+uploads/

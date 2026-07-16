@@ -1,0 +1,222 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Admin {
+  id                            String  @id @default(uuid())
+  email                         String  @unique
+  passwordHash                  String
+  firstName                     String  @default("Sonu")
+  lastName                      String  @default("Ambre")
+  whatsapp                      String  @default("+91 98765 43210")
+  
+  // Notification settings
+  notifEmailInquiry            Boolean @default(true)
+  notifWhatsappBooking          Boolean @default(true)
+  notifSmsReminder              Boolean @default(false)
+  notifWeeklySummary            Boolean @default(true)
+  
+  // Integration settings
+  integrationCalendarConnected  Boolean @default(true)
+  integrationRazorpayConnected  Boolean @default(true)
+  integrationInstagramConnected Boolean @default(false)
+  integrationMailchimpConnected Boolean @default(false)
+
+  // Razorpay API Credentials
+  razorpayKeyId                 String?
+  razorpayKeySecret             String?
+
+  // Legal policy pages HTML content
+  privacyPolicy                 String?
+  termsOfService                String?
+  refundPolicy                  String?
+
+  // GST configurations
+  gstNumber                     String?
+
+  // Referral and service area settings
+  serviceArea                   String?  @default("Personal Training available in Mumbai")
+
+  // Seasonal offer settings
+  seasonalBannerActive          Boolean  @default(false)
+  seasonalBannerText            String?
+  seasonalBannerDiscount        Int?
+
+  // Main website translations
+  heroTitleEn                   String?  @default("APEX Fitness Coaching")
+  heroTitleHi                   String?  @default("एपेक्स फिटनेस कोचिंग")
+  heroSubtitleEn                String?  @default("Transform your body, build your mind.")
+  heroSubtitleHi                String?  @default("अपने शरीर को बदलें, अपने दिमाग को मजबूत करें।")
+  aboutTextEn                   String?  @default("Sonu Ambre is a certified trainer with over 8 years of coaching experience.")
+  aboutTextHi                   String?  @default("सोनू आम्ब्रे एक प्रमाणित ट्रेनर हैं जिनके पास 8 साल से अधिक का कोचिंग अनुभव है।")
+
+  // English & Hindi configurations for the 4 key Programs
+  prog1NameEn                   String?  @default("Fat Loss")
+  prog1NameHi                   String?  @default("वसा हानि")
+  prog1DescEn                   String?  @default("Sustainable fat loss coaching.")
+  prog1DescHi                   String?  @default("सतत वसा हानि कोचिंग।")
+  prog1PriceEn                  String?  @default("₹12,000")
+  prog1PriceHi                  String?  @default("₹12,000")
+
+  prog2NameEn                   String?  @default("Muscle Building")
+  prog2NameHi                   String?  @default("मांसपेशियों का निर्माण")
+  prog2DescEn                   String?  @default("Hypertrophy and strength training.")
+  prog2DescHi                   String?  @default("हाइपरट्रॉफी और ताकत प्रशिक्षण।")
+  prog2PriceEn                  String?  @default("₹14,000")
+  prog2PriceHi                  String?  @default("₹14,000")
+
+  prog3NameEn                   String?  @default("Body Recomp")
+  prog3NameHi                   String?  @default("बॉडी रीकॉम्प")
+  prog3DescEn                   String?  @default("Lose fat and build muscle simultaneously.")
+  prog3DescHi                   String?  @default("वसा कम करें और मांसपेशियों का निर्माण एक साथ करें।")
+  prog3PriceEn                  String?  @default("₹16,000")
+  prog3PriceHi                  String?  @default("₹16,000")
+
+  prog4NameEn                   String?  @default("Contest Prep")
+  prog4NameHi                   String?  @default("प्रतियोगिता तैयारी")
+  prog4DescEn                   String?  @default("Stage-ready physique preparation.")
+  prog4DescHi                   String?  @default("स्टेज-तैयार शारीरिक तैयारी।")
+  prog4PriceEn                  String?  @default("₹18,000")
+  prog4PriceHi                  String?  @default("₹18,000")
+}
+
+model Client {
+  id          String   @id @default(uuid())
+  name        String
+  program     String
+  plan        String
+  startDate   DateTime @default(now())
+  checkinDate String
+  progress    Int      @default(0)
+  status      String   @default("active")
+  paidUntil   DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Inquiry {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  phone     String?
+  message   String
+  subject   String?
+  time      String?
+  status    String   @default("new")
+  createdAt DateTime @default(now())
+}
+
+model Booking {
+  id              String   @id @default(uuid())
+  name            String
+  email           String
+  phone           String
+  dateTime        DateTime
+  programInterest String
+  status          String   @default("pending")
+  createdAt       DateTime @default(now())
+}
+
+model BlogPost {
+  id         String   @id @default(uuid())
+  title      String
+  category   String
+  content    String
+  coverImage String?
+  status     String   @default("published")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Transformation {
+  id          String   @id @default(uuid())
+  clientName  String
+  duration    String
+  result      String
+  programType String
+  beforeImage String?
+  afterImage  String?
+  testimonial String?
+  consent     Boolean  @default(false)
+  status      String   @default("live")
+  videoUrl    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Video {
+  id             String   @id @default(uuid())
+  title          String
+  url            String
+  category       String
+  showOnHomepage Boolean  @default(true)
+  status         String   @default("live")
+  views          String   @default("0")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Resource {
+  id            String   @id @default(uuid())
+  name          String
+  type          String
+  access        String   @default("Public")
+  downloads     Int      @default(0)
+  fileUrl       String?
+  isVegFriendly Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model PricingPlan {
+  id            String   @id @default(uuid())
+  name          String
+  price         Int
+  features      String
+  isActive      Boolean  @default(true)
+  isVegFriendly Boolean  @default(false)
+  nameHindi     String?
+  featuresHindi String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Certification {
+  id               String   @id @default(uuid())
+  title            String
+  issuingBody      String
+  imageUrl         String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Payment {
+  id             String   @id @default(uuid())
+  orderId        String   @unique
+  paymentId      String?  @unique
+  signature      String?
+  amount         Int
+  currency       String   @default("INR")
+  status         String   @default("created")
+  planId         String
+  clientName     String
+  clientEmail    String
+  clientPhone    String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model User {
+  id           String    @id @default(uuid())
+  name         String
+  email        String    @unique
+  phone        String?
+  passwordHash String
+  createdAt    DateTime  @default(now())
+  lastLoginAt  DateTime?
+}

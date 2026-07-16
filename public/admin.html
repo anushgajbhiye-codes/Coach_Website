@@ -1,0 +1,2395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APEX Admin — Coach Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #C9A84C;
+  --gold-light: #E8C97A;
+  --gold-dark: #9A7A2E;
+  --teal: #2DD4BF;
+  --teal-light: #5EEAD4;
+  --teal-dark: #14B8A6;
+  --black: #0E0E10;
+  --dark: #131316;
+  --dark2: #16161A;
+  --dark3: #1C1C21;
+  --dark4: #222226;
+  --gray: #2A2A30;
+  --gray2: #A8A6A0;
+  --gray3: #8A8880;
+  --white: #F2F1ED;
+  --green: #34D399;
+  --red: #F87171;
+  --blue: #60A5FA;
+  --orange: #FBBF24;
+  --glass: rgba(255,255,255,0.03);
+  --glass-border: rgba(201,168,76,0.15);
+  --T: 0.28s cubic-bezier(0.4,0,0.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:16px;}
+body{background:var(--black);color:var(--white);font-family:'Inter',sans-serif;line-height:1.5;overflow-x:hidden;}
+::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-track{background:var(--dark);}::-webkit-scrollbar-thumb{background:var(--gold);border-radius:2px;}
+::selection{background:rgba(201,168,76,0.25);color:var(--white);}
+
+/* ── LOGIN SCREEN ── */
+#loginScreen{
+  position:fixed;inset:0;z-index:9999;
+  background:var(--black);
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;
+  background-image:linear-gradient(rgba(201,168,76,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,0.03) 1px,transparent 1px);
+  background-size:48px 48px;
+  transition:opacity 0.5s ease,visibility 0.5s ease;
+}
+#loginScreen.hidden{opacity:0;visibility:hidden;pointer-events:none;}
+.login-box{
+  width:100%;max-width:420px;
+  padding:52px 44px;
+  background:var(--dark2);
+  border:1px solid var(--glass-border);
+  border-radius:4px;
+  position:relative;
+}
+.login-box::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+}
+.login-logo{
+  font-family:'Bebas Neue',sans-serif;font-size:38px;letter-spacing:8px;
+  background:linear-gradient(135deg,var(--gold-light),var(--gold));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  display:block;margin-bottom:6px;
+}
+.login-subtitle{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--gray3);margin-bottom:40px;}
+.login-label{display:block;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--gray3);margin-bottom:8px;}
+.login-input{
+  width:100%;padding:14px 16px;
+  background:var(--dark3);border:1px solid rgba(255,255,255,0.07);
+  border-radius:2px;color:var(--white);font-family:'Inter',sans-serif;font-size:15px;
+  outline:none;transition:border-color var(--T);margin-bottom:18px;
+}
+.login-input:focus{border-color:var(--gold);}
+.login-btn{
+  width:100%;padding:16px;
+  background:linear-gradient(135deg,var(--gold),var(--gold-dark));
+  color:var(--black);font-size:12px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;
+  border:none;cursor:pointer;border-radius:2px;transition:all var(--T);
+  position:relative;overflow:hidden;
+}
+.login-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--gold-light),var(--gold));opacity:0;transition:opacity var(--T);}
+.login-btn:hover::before{opacity:1;}
+.login-btn:hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(201,168,76,0.3);}
+.login-btn span{position:relative;z-index:1;}
+.login-error{display:none;font-size:13px;color:#ef4444;margin-top:-10px;margin-bottom:16px;padding:10px 14px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:2px;}
+.login-hint{margin-top:24px;padding:16px;background:rgba(201,168,76,0.05);border:1px solid rgba(201,168,76,0.15);border-radius:2px;}
+.login-hint-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:6px;}
+.login-hint p{font-size:12px;color:var(--gray3);}
+.login-hint code{color:var(--gold-light);font-size:13px;font-weight:600;}
+
+/* ── APP SHELL ── */
+#app{display:none;height:100vh;overflow:hidden;}
+#app.visible{display:flex;}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:240px;flex-shrink:0;
+  background:var(--dark2);
+  border-right:1px solid rgba(255,255,255,0.05);
+  display:flex;flex-direction:column;
+  height:100vh;overflow-y:auto;
+  transition:width var(--T);
+}
+.sidebar.collapsed{width:64px;}
+.sidebar-logo{
+  padding:24px 20px 20px;
+  border-bottom:1px solid rgba(255,255,255,0.05);
+  display:flex;align-items:center;gap:12px;
+  flex-shrink:0;
+}
+.sidebar-logo-text{
+  font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:5px;
+  background:linear-gradient(135deg,var(--gold-light),var(--gold));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  white-space:nowrap;overflow:hidden;
+  transition:opacity var(--T),width var(--T);
+}
+.sidebar.collapsed .sidebar-logo-text{opacity:0;width:0;}
+.sidebar-nav{padding:16px 0;flex:1;}
+.nav-section-label{
+  font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;
+  color:rgba(255,255,255,0.2);padding:12px 20px 6px;
+  white-space:nowrap;overflow:hidden;
+  transition:opacity var(--T);
+}
+.sidebar.collapsed .nav-section-label{opacity:0;}
+.nav-item{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 20px;cursor:pointer;
+  font-size:13px;font-weight:500;color:var(--gray3);
+  border-left:2px solid transparent;
+  transition:all var(--T);white-space:nowrap;
+  text-decoration:none;
+  position:relative;
+}
+.nav-item:hover{color:var(--white);background:rgba(255,255,255,0.03);}
+.nav-item.active{color:var(--teal);border-left-color:var(--teal);background:rgba(45,212,191,0.08);}
+.nav-icon{font-size:17px;flex-shrink:0;width:20px;text-align:center;}
+.nav-label{overflow:hidden;transition:opacity var(--T);}
+.sidebar.collapsed .nav-label{opacity:0;width:0;overflow:hidden;}
+.nav-badge{
+  margin-left:auto;padding:2px 8px;border-radius:10px;
+  background:rgba(201,168,76,0.15);color:var(--gold);
+  font-size:10px;font-weight:700;flex-shrink:0;
+  transition:opacity var(--T);
+}
+.sidebar.collapsed .nav-badge{opacity:0;}
+.sidebar-footer{
+  padding:16px 20px;border-top:1px solid rgba(255,255,255,0.05);flex-shrink:0;
+}
+.sidebar-user{display:flex;align-items:center;gap:12px;}
+.sidebar-avatar{
+  width:36px;height:36px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--gold-dark),var(--gold));
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:13px;color:var(--black);
+}
+.sidebar-user-info{overflow:hidden;transition:opacity var(--T);}
+.sidebar.collapsed .sidebar-user-info{opacity:0;width:0;}
+.sidebar-user-name{font-size:13px;font-weight:600;color:var(--white);}
+.sidebar-user-role{font-size:11px;color:var(--gold);letter-spacing:1px;}
+.collapse-btn{
+  margin-top:12px;width:100%;padding:8px;
+  background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);
+  border-radius:2px;color:var(--gray3);font-size:16px;cursor:pointer;
+  transition:all var(--T);display:flex;align-items:center;justify-content:center;
+}
+.collapse-btn:hover{color:var(--white);}
+.sidebar.collapsed .collapse-btn{transform:scaleX(-1);}
+
+/* ── MAIN ── */
+.main{flex:1;overflow-y:auto;background:var(--black);display:flex;flex-direction:column;}
+.topbar{
+  padding:0 32px;height:64px;flex-shrink:0;
+  background:rgba(10,10,10,0.9);backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(255,255,255,0.05);
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;
+}
+.topbar-left{display:flex;align-items:center;gap:16px;}
+.page-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--white);}
+.page-breadcrumb{font-size:12px;color:var(--gray3);}
+.topbar-right{display:flex;align-items:center;gap:12px;}
+.topbar-btn{
+  padding:8px 16px;border-radius:2px;font-size:12px;font-weight:600;letter-spacing:1px;
+  cursor:pointer;border:1px solid rgba(255,255,255,0.08);background:transparent;
+  color:var(--gray3);transition:all var(--T);display:flex;align-items:center;gap:6px;
+}
+.topbar-btn:hover{color:var(--white);border-color:rgba(255,255,255,0.2);}
+#menuBtn{display:none;}
+.topbar-notif{position:relative;}
+.notif-dot{
+  position:absolute;top:4px;right:4px;
+  width:8px;height:8px;border-radius:50%;background:var(--gold);
+  border:2px solid var(--black);
+}
+.content{padding:32px;flex:1;}
+
+/* ── STAT CARDS ── */
+.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:28px;}
+.stat-card{
+  padding:24px 22px;background:var(--dark2);border:1px solid rgba(255,255,255,0.05);
+  border-radius:3px;position:relative;overflow:hidden;transition:all var(--T);
+}
+.stat-card:hover{border-color:rgba(201,168,76,0.25);background:var(--dark3);}
+.stat-card::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  opacity:0;transition:opacity var(--T);
+}
+.stat-card:hover::after{opacity:1;}
+.stat-icon{font-size:22px;margin-bottom:14px;display:block;}
+.stat-value{font-family:'Bebas Neue',sans-serif;font-size:38px;letter-spacing:1px;color:var(--white);line-height:1;margin-bottom:4px;}
+.stat-label{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--gray3);}
+.stat-delta{
+  margin-top:10px;font-size:12px;font-weight:600;
+  display:flex;align-items:center;gap:4px;
+}
+.delta-up{color:var(--green);}
+.delta-down{color:var(--red);}
+
+/* ── PANELS ── */
+.panel{background:var(--dark2);border:1px solid rgba(255,255,255,0.05);border-radius:3px;margin-bottom:24px;}
+.panel-head{
+  padding:18px 24px;border-bottom:1px solid rgba(255,255,255,0.05);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.panel-title{font-size:13px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--white);}
+.panel-action{
+  padding:6px 14px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  border:1px solid rgba(201,168,76,0.3);background:transparent;color:var(--gold);
+  border-radius:2px;cursor:pointer;transition:all var(--T);
+}
+.panel-action:hover{background:rgba(201,168,76,0.1);}
+.panel-body{padding:24px;}
+
+/* ── TABLE ── */
+.data-table{width:100%;border-collapse:collapse;font-size:13px;}
+.data-table th{
+  padding:10px 16px;text-align:left;
+  font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gray3);
+  border-bottom:1px solid rgba(255,255,255,0.05);
+}
+.data-table td{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.04);color:rgba(255,255,255,0.75);vertical-align:middle;}
+.data-table tr:hover td{background:rgba(255,255,255,0.02);color:var(--white);}
+.data-table tr:last-child td{border-bottom:none;}
+.badge{
+  display:inline-flex;align-items:center;padding:3px 10px;border-radius:2px;
+  font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+}
+.badge-active{background:rgba(34,197,94,0.12);color:var(--green);}
+.badge-pending{background:rgba(251,191,36,0.12);color:var(--orange);}
+.badge-inactive{background:rgba(136,136,136,0.1);color:var(--gray3);}
+.badge-new{background:rgba(59,130,246,0.12);color:var(--blue);}
+.tbl-avatar{
+  width:32px;height:32px;border-radius:50%;
+  background:linear-gradient(135deg,var(--dark4),var(--gray));
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;color:var(--gold);
+  margin-right:10px;vertical-align:middle;flex-shrink:0;
+}
+.action-btn{
+  padding:5px 12px;border-radius:2px;font-size:11px;font-weight:600;letter-spacing:1px;
+  cursor:pointer;border:1px solid rgba(255,255,255,0.08);background:transparent;
+  color:var(--gray3);transition:all var(--T);margin-right:4px;
+}
+.action-btn:hover{color:var(--white);border-color:rgba(255,255,255,0.2);}
+.action-btn.gold{border-color:rgba(201,168,76,0.3);color:var(--gold);}
+.action-btn.gold:hover{background:rgba(201,168,76,0.1);}
+
+/* ── GRID 2COL ── */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+@media(max-width:1100px){.grid-2{grid-template-columns:1fr;}.grid-3{grid-template-columns:1fr 1fr;}}
+@media(max-width:700px){.grid-3{grid-template-columns:1fr;}}
+
+/* ── FORM ELEMENTS ── */
+.form-group{margin-bottom:18px;}
+.form-label{display:block;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--gray3);margin-bottom:8px;}
+.form-input,.form-select,.form-textarea{
+  width:100%;padding:12px 14px;
+  background:var(--dark3);border:1px solid rgba(255,255,255,0.07);
+  border-radius:2px;color:var(--white);font-family:'Inter',sans-serif;font-size:14px;
+  outline:none;transition:border-color var(--T);
+}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--gold);}
+.form-textarea{min-height:100px;resize:vertical;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:600px){.form-row{grid-template-columns:1fr;}}
+.btn-gold{
+  padding:13px 28px;
+  background:linear-gradient(135deg,var(--gold),var(--gold-dark));
+  color:var(--black);font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  border:none;cursor:pointer;border-radius:2px;transition:all var(--T);
+  display:inline-flex;align-items:center;gap:8px;
+}
+.btn-gold:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(201,168,76,0.3);}
+.btn-ghost{
+  padding:12px 24px;background:transparent;
+  border:1px solid rgba(255,255,255,0.08);color:var(--gray3);
+  font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;
+  cursor:pointer;border-radius:2px;transition:all var(--T);
+  display:inline-flex;align-items:center;gap:8px;
+}
+.btn-ghost:hover{color:var(--white);border-color:rgba(255,255,255,0.2);}
+
+/* ── UPLOAD ZONE ── */
+.upload-zone{
+  border:1px dashed rgba(201,168,76,0.25);border-radius:3px;
+  padding:40px 24px;text-align:center;cursor:pointer;
+  transition:all var(--T);background:rgba(201,168,76,0.02);
+}
+.upload-zone:hover{border-color:rgba(201,168,76,0.5);background:rgba(201,168,76,0.04);}
+.upload-icon{font-size:36px;display:block;margin-bottom:12px;opacity:0.6;}
+.upload-label{font-size:14px;color:var(--gray3);margin-bottom:6px;}
+.upload-sub{font-size:12px;color:rgba(255,255,255,0.2);}
+
+/* ── MINI CHART (SVG bars) ── */
+.mini-chart{display:flex;align-items:flex-end;gap:3px;height:48px;}
+.bar{flex:1;border-radius:1px 1px 0 0;transition:opacity var(--T);background:var(--dark4);}
+.bar.teal{background:var(--teal);}
+.bar:hover{opacity:0.7;}
+
+/* ── INQUIRY CARD ── */
+.inq-card{
+  padding:18px 20px;border-bottom:1px solid rgba(255,255,255,0.04);
+  display:flex;align-items:flex-start;gap:16px;transition:background var(--T);
+}
+.inq-card:last-child{border-bottom:none;}
+.inq-card:hover{background:rgba(255,255,255,0.02);}
+.inq-avatar{
+  width:38px;height:38px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;color:var(--black);
+  background:linear-gradient(135deg,var(--gold-dark),var(--gold));
+}
+.inq-name{font-size:14px;font-weight:600;color:var(--white);}
+.inq-msg{font-size:13px;color:var(--gray3);line-height:1.5;margin-top:2px;}
+.inq-time{font-size:11px;color:rgba(255,255,255,0.2);margin-top:4px;}
+.inq-actions{margin-left:auto;display:flex;gap:6px;flex-shrink:0;}
+
+/* ── TOGGLE ── */
+.toggle-wrap{display:flex;align-items:center;gap:10px;cursor:pointer;}
+.toggle{width:40px;height:22px;border-radius:11px;background:var(--dark4);position:relative;transition:background var(--T);flex-shrink:0;}
+.toggle.on{background:rgba(201,168,76,0.7);}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--white);transition:transform var(--T);}
+.toggle.on::after{transform:translateX(18px);}
+.toggle-label{font-size:13px;color:var(--gray3);}
+
+/* ── PROGRESS BAR ── */
+.prog-bar{height:5px;background:var(--dark4);border-radius:2px;overflow:hidden;margin-top:8px;}
+.prog-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--gold-dark),var(--gold-light));}
+
+/* ── TABS ── */
+.page-tabs{display:flex;gap:2px;margin-bottom:24px;border-bottom:1px solid rgba(255,255,255,0.06);padding-bottom:0;}
+.page-tab{
+  padding:10px 20px;font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--gray3);cursor:pointer;border-bottom:2px solid transparent;
+  transition:all var(--T);background:none;border-left:none;border-right:none;border-top:none;
+}
+.page-tab.active{color:var(--teal);border-bottom-color:var(--teal);}
+
+/* ── PAGE SECTIONS ── */
+.page{display:none;}
+.page.active{display:block;}
+
+/* ── NOTIFICATION TOAST ── */
+.toast{
+  position:fixed;top:80px;right:24px;z-index:9000;
+  padding:14px 20px;background:var(--dark2);border:1px solid rgba(201,168,76,0.3);
+  border-radius:3px;border-left:3px solid var(--gold);
+  font-size:13px;color:var(--white);
+  display:flex;align-items:center;gap:10px;
+  transform:translateX(120%);transition:transform 0.35s ease;
+  box-shadow:0 8px 32px rgba(0,0,0,0.5);
+  max-width:300px;
+}
+.toast.show{transform:translateX(0);}
+
+/* ── MOBILE ── */
+@media(max-width:768px){
+  .sidebar{position:fixed;left:-240px;z-index:200;transition:left var(--T);}
+  .sidebar.mobile-open{left:0;}
+  .content{padding:20px 16px;}
+  .topbar{padding:0 16px;}
+  .stat-row{grid-template-columns:1fr 1fr;}
+  #menuBtn{display:flex;}
+}
+@media(max-width:420px){
+  .stat-row{grid-template-columns:1fr;}
+  .toast{right:12px;left:12px;max-width:calc(100% - 24px);}
+  #clientModal{width:90% !important;max-width:90% !important;}
+}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast">✓ &nbsp;<span id="toastMsg">Action completed</span></div>
+
+<!-- ═══ LOGIN ═══ -->
+<div id="loginScreen">
+  <div class="login-box">
+    <span class="login-logo">APEX</span>
+    <p class="login-subtitle">Admin Panel — Coach Access</p>
+    <label class="login-label" for="loginEmail">Email Address</label>
+    <input class="login-input" id="loginEmail" type="email" placeholder="Email" autocomplete="username">
+    <label class="login-label" for="loginPass">Password</label>
+    <input class="login-input" id="loginPass" type="password" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    <div class="login-error" id="loginError">Incorrect email or password. Please try again.</div>
+    <button class="login-btn" onclick="doLogin()"><span>Access Dashboard →</span></button>
+  </div>
+</div>
+
+<!-- ═══ APP ═══ -->
+<div id="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <span style="font-size:22px;">⚡</span>
+      <span class="sidebar-logo-text">APEX</span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <a class="nav-item active" onclick="goPage('dashboard',this)">
+        <span class="nav-icon">📊</span><span class="nav-label">Dashboard</span>
+      </a>
+      <a class="nav-item" onclick="goPage('clients',this)">
+        <span class="nav-icon">👥</span><span class="nav-label">Clients</span>
+        <span class="nav-badge">24</span>
+      </a>
+      <a class="nav-item" onclick="goPage('inquiries',this)">
+        <span class="nav-icon">📨</span><span class="nav-label">Inquiries</span>
+        <span class="nav-badge" style="background:rgba(239,68,68,0.15);color:#ef4444;">7</span>
+      </a>
+      <a class="nav-item" onclick="goPage('bookings',this)">
+        <span class="nav-icon">📅</span><span class="nav-label">Bookings</span>
+      </a>
+      <a class="nav-item" onclick="goPage('users',this)">
+        <span class="nav-icon">👤</span><span class="nav-label">Website Users</span>
+      </a>
+      <div class="nav-section-label">Content</div>
+      <a class="nav-item" onclick="goPage('blog',this)">
+        <span class="nav-icon">✍️</span><span class="nav-label">Blog Posts</span>
+      </a>
+      <a class="nav-item" onclick="goPage('transformations',this)">
+        <span class="nav-icon">🏆</span><span class="nav-label">Transformations</span>
+      </a>
+
+      <a class="nav-item" onclick="goPage('resources',this)">
+        <span class="nav-icon">📁</span><span class="nav-label">Resources / PDFs</span>
+      </a>
+      <a class="nav-item" onclick="goPage('certifications',this)">
+        <span class="nav-icon">📜</span><span class="nav-label">Certifications</span>
+      </a>
+      <div class="nav-section-label">Business</div>
+      <a class="nav-item" onclick="goPage('pricing',this)">
+        <span class="nav-icon">💰</span><span class="nav-label">Pricing</span>
+      </a>
+      <a class="nav-item" onclick="goPage('settings',this)">
+        <span class="nav-icon">⚙️</span><span class="nav-label">Settings</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar">SA</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name">Sonu Ambre</div>
+          <div class="sidebar-user-role">Head Coach</div>
+        </div>
+      </div>
+      <button class="collapse-btn" onclick="toggleSidebar()" title="Collapse sidebar">◀</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="topbar-btn" id="menuBtn">☰</button>
+        <div>
+          <div class="page-title" id="pageTitle">DASHBOARD</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="topbar-btn topbar-notif" onclick="showToast('No new notifications')">
+          🔔 <span class="notif-dot"></span>
+        </button>
+        <button class="topbar-btn" onclick="doLogout()">🚪 Logout</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ── DASHBOARD ── -->
+      <div class="page active" id="page-dashboard">
+        <div class="stat-row">
+          <div class="stat-card">
+            <span class="stat-icon">👥</span>
+            <div class="stat-value">24</div>
+            <div class="stat-label">Active Clients</div>
+            <div class="stat-delta delta-up">↑ 3 this month</div>
+          </div>
+          <div class="stat-card">
+            <span class="stat-icon">📨</span>
+            <div class="stat-value">7</div>
+            <div class="stat-label">New Inquiries</div>
+            <div class="stat-delta" style="color:var(--gold);">Action required</div>
+          </div>
+        </div>
+
+        <div>
+          <!-- Recent Inquiries -->
+          <div class="panel">
+            <div class="panel-head">
+              <span class="panel-title">New Inquiries</span>
+              <button class="panel-action" onclick="goPage('inquiries',null)">View All</button>
+            </div>
+            <div id="inqList">
+              <!-- filled by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Clients -->
+        <div class="panel">
+          <div class="panel-head">
+            <span class="panel-title">Active Clients</span>
+            <button class="panel-action" onclick="goPage('clients',null)">Manage All</button>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="data-table">
+              <thead><tr>
+                <th>Client</th><th>Program</th><th>Plan</th><th>Check-in</th><th>Progress</th><th>Status</th><th>Actions</th>
+              </tr></thead>
+              <tbody id="clientTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── CLIENTS ── -->
+      <div class="page" id="page-clients">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+          <input class="form-input" style="max-width:300px;margin:0;" placeholder="🔍  Search clients..." oninput="filterClients(this.value)">
+          <button class="btn-gold" onclick="openClientModal()">+ Add New Client</button>
+        </div>
+        <div class="panel">
+          <div style="overflow-x:auto;">
+            <table class="data-table" id="fullClientTable">
+              <thead><tr>
+                <th>Client</th><th>Program</th><th>Plan</th><th>Start Date</th><th>Next Check-in</th><th>Paid Until</th><th>Status</th><th>Actions</th>
+              </tr></thead>
+              <tbody id="fullClientBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── INQUIRIES ── -->
+      <div class="page" id="page-inquiries">
+        <div class="panel">
+          <div class="panel-head"><span class="panel-title">All Inquiries (7 New)</span></div>
+          <div id="fullInqList"></div>
+        </div>
+      </div>
+
+      <!-- ── BOOKINGS ── -->
+      <div class="page" id="page-bookings">
+        <div class="stat-row" style="grid-template-columns:repeat(3,1fr);">
+          <div class="stat-card"><span class="stat-icon">📅</span><div class="stat-value">5</div><div class="stat-label">This Week</div></div>
+          <div class="stat-card"><span class="stat-icon">⏳</span><div class="stat-value">3</div><div class="stat-label">Pending Approval</div></div>
+          <div class="stat-card"><span class="stat-icon">✅</span><div class="stat-value">2</div><div class="stat-label">Confirmed</div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><span class="panel-title">Upcoming Consultations</span></div>
+          <div style="overflow-x:auto;">
+            <table class="data-table">
+              <thead><tr><th>Name</th><th>Date & Time</th><th>Program Interest</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody>
+                <tr><td><span class="tbl-avatar">RP</span>Rohan Patel</td><td>Jan 15, 10:00 AM</td><td>Fat Loss</td><td><span class="badge badge-pending">Pending</span></td><td><button class="action-btn gold" onclick="showToast('Booking approved ✓')">Approve</button><button class="action-btn" onclick="showToast('Booking declined')">Decline</button></td></tr>
+                <tr><td><span class="tbl-avatar">SN</span>Sana Nair</td><td>Jan 15, 11:30 AM</td><td>Women's Coaching</td><td><span class="badge badge-pending">Pending</span></td><td><button class="action-btn gold" onclick="showToast('Booking approved ✓')">Approve</button><button class="action-btn" onclick="showToast('Booking declined')">Decline</button></td></tr>
+                <tr><td><span class="tbl-avatar">AK</span>Arjun Kumar</td><td>Jan 16, 2:00 PM</td><td>Contest Prep</td><td><span class="badge badge-active">Confirmed</span></td><td><button class="action-btn" onclick="showToast('Reminder sent')">Send Reminder</button></td></tr>
+                <tr><td><span class="tbl-avatar">PD</span>Priya Desai</td><td>Jan 17, 9:00 AM</td><td>Muscle Building</td><td><span class="badge badge-active">Confirmed</span></td><td><button class="action-btn" onclick="showToast('Reminder sent')">Send Reminder</button></td></tr>
+                <tr><td><span class="tbl-avatar">VK</span>Vikram Khanna</td><td>Jan 18, 4:00 PM</td><td>Body Recomp</td><td><span class="badge badge-pending">Pending</span></td><td><button class="action-btn gold" onclick="showToast('Booking approved ✓')">Approve</button><button class="action-btn" onclick="showToast('Booking declined')">Decline</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── WEBSITE USERS ── -->
+      <div class="page" id="page-users">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+          <input class="form-input" style="max-width:300px;margin:0;" placeholder="🔍  Search by name or email..." oninput="filterUsers(this.value)">
+          <div class="badge-row" style="display:flex;gap:8px;">
+            <span class="badge badge-active" style="padding: 8px 16px; font-size:12px;" id="usersTotalCount">Total: 0 Users</span>
+          </div>
+        </div>
+        <div class="panel">
+          <div style="overflow-x:auto;">
+            <table class="data-table" id="fullUsersTable">
+              <thead><tr>
+                <th>Name</th><th>Email</th><th>Phone</th><th>Signup Date</th><th>Last Login Date</th><th>Actions</th>
+              </tr></thead>
+              <tbody id="fullUsersBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── BLOG ── -->
+      <div class="page" id="page-blog">
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel-head"><span class="panel-title">Write New Post</span></div>
+            <div class="panel-body">
+              <div class="form-group">
+                <label class="form-label">Post Title</label>
+                <input class="form-input" id="blogTitle" placeholder="e.g. The Truth About Calorie Deficit">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Category</label>
+                <select class="form-select" id="blogCategory">
+                  <option>Nutrition</option><option>Training</option><option>Fat Loss</option><option>Muscle Building</option><option>Mindset</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Content</label>
+                <textarea class="form-textarea" id="blogContent" style="min-height:160px;" placeholder="Write your article here..."></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Cover Image</label>
+                <div class="upload-zone" onclick="document.getElementById('blogCoverFile').click()">
+                  <input type="file" id="blogCoverFile" style="display:none;" onchange="updateUploadLabel('blogUploadLabel', this)">
+                  <span class="upload-icon">🖼️</span>
+                  <div class="upload-label" id="blogUploadLabel">Click to upload cover image</div>
+                  <div class="upload-sub">JPG, PNG up to 5MB</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:12px;">
+                <button class="btn-gold" onclick="submitBlogPost(false)">Publish Post</button>
+                <button class="btn-ghost" onclick="submitBlogPost(true)">Save Draft</button>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span class="panel-title">Published Posts</span></div>
+            <div style="overflow-x:auto;">
+              <table class="data-table">
+                <thead><tr><th>Title</th><th>Category</th><th>Date</th><th></th></tr></thead>
+                <tbody>
+                  <tr><td>5 Fat Loss Mistakes</td><td>Fat Loss</td><td>Dec 28</td><td><button class="action-btn" onclick="showToast('Post editor opened')">Edit</button></td></tr>
+                  <tr><td>Progressive Overload 101</td><td>Training</td><td>Dec 15</td><td><button class="action-btn" onclick="showToast('Post editor opened')">Edit</button></td></tr>
+                  <tr><td>Protein Sources Ranked</td><td>Nutrition</td><td>Dec 02</td><td><button class="action-btn" onclick="showToast('Post editor opened')">Edit</button></td></tr>
+                  <tr><td>Sleep & Muscle Recovery</td><td>Mindset</td><td>Nov 18</td><td><button class="action-btn" onclick="showToast('Post editor opened')">Edit</button></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── TRANSFORMATIONS ── -->
+      <div class="page" id="page-transformations">
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel-head"><span class="panel-title">Add Transformation</span></div>
+            <div class="panel-body">
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Client Name</label>
+                  <input class="form-input" id="transClientName" placeholder="e.g. Rohan P.">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Duration</label>
+                  <input class="form-input" id="transDuration" placeholder="e.g. 16 weeks">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Result (e.g. −22kg)</label>
+                  <input class="form-input" id="transResult" placeholder="−22kg">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Program Type</label>
+                  <select class="form-select" id="transProgramType">
+                    <option>Fat Loss</option><option>Muscle Building</option><option>Contest Prep</option><option>Recomp</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Before Photo</label>
+                  <div class="upload-zone" style="padding:24px;" onclick="document.getElementById('transBeforeFile').click()">
+                    <input type="file" id="transBeforeFile" style="display:none;" onchange="updateUploadLabel('transBeforeLabel', this)">
+                    <span class="upload-icon">📷</span>
+                    <div class="upload-label" id="transBeforeLabel">Before</div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">After Photo</label>
+                  <div class="upload-zone" style="padding:24px;" onclick="document.getElementById('transAfterFile').click()">
+                    <input type="file" id="transAfterFile" style="display:none;" onchange="updateUploadLabel('transAfterLabel', this)">
+                    <span class="upload-icon">📷</span>
+                    <div class="upload-label" id="transAfterLabel">After</div>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Client Testimonial</label>
+                <textarea class="form-textarea" id="transTestimonial" placeholder="Optional client quote..."></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Video Testimonial URL (YouTube/Vimeo embed or direct video link)</label>
+                <input class="form-input" id="transVideoUrl" placeholder="e.g. https://www.youtube.com/embed/dQw4w9WgXcQ">
+              </div>
+              <div class="toggle-wrap" style="margin-bottom:18px;" onclick="toggleConsentToggle()">
+                <div class="toggle" id="transConsent"></div>
+                <span class="toggle-label">Client consent confirmed (photos approved for public display)</span>
+              </div>
+              <button class="btn-gold" onclick="submitTransformation()">Upload Transformation</button>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span class="panel-title">All Transformations (12)</span></div>
+            <div style="overflow-x:auto;">
+              <table class="data-table">
+                <thead><tr><th>Client</th><th>Result</th><th>Program</th><th>Status</th><th></th></tr></thead>
+                <tbody>
+                  <tr><td>Rohan P.</td><td style="color:var(--green);">−22kg</td><td>Fat Loss</td><td><span class="badge badge-active">Live</span></td><td><button class="action-btn" onclick="showToast('Edit opened')">Edit</button></td></tr>
+                  <tr><td>Sana N.</td><td style="color:var(--green);">+9kg muscle</td><td>Muscle</td><td><span class="badge badge-active">Live</span></td><td><button class="action-btn" onclick="showToast('Edit opened')">Edit</button></td></tr>
+                  <tr><td>Arjun K.</td><td style="color:var(--gold);">Stage ready</td><td>Contest Prep</td><td><span class="badge badge-active">Live</span></td><td><button class="action-btn" onclick="showToast('Edit opened')">Edit</button></td></tr>
+                  <tr><td>Dev K.</td><td style="color:var(--green);">−18kg</td><td>Fat Loss</td><td><span class="badge badge-pending">Draft</span></td><td><button class="action-btn gold" onclick="showToast('Published ✓')">Publish</button></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+      <!-- ── RESOURCES ── -->
+      <div class="page" id="page-resources">
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel-head"><span class="panel-title">Upload PDF / Resource</span></div>
+            <div class="panel-body">
+              <div class="form-group">
+                <label class="form-label">Resource Title</label>
+                <input class="form-input" id="resourceTitle" placeholder="e.g. 4-Week Fat Loss Meal Plan">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Type</label>
+                <select class="form-select" id="resourceType">
+                  <option>Meal Plan PDF</option><option>Workout PDF</option><option>eBook</option><option>Check-in Form</option><option>Progress Template</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Visibility</label>
+                <select class="form-select" id="resourceAccess">
+                  <option value="All">All Clients</option><option value="Pro+">Pro Only</option><option value="Public">Free (Public)</option>
+                </select>
+              </div>
+              <div class="toggle-wrap" style="margin-bottom:16px;" onclick="document.getElementById('resourceVegFriendly').classList.toggle('on')">
+                <div class="toggle" id="resourceVegFriendly"></div>
+                <span class="toggle-label">Vegetarian-Friendly Badge</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label">File</label>
+                <div class="upload-zone" onclick="document.getElementById('resourceFile').click()">
+                  <input type="file" id="resourceFile" style="display:none;" onchange="updateUploadLabel('resourceUploadLabel', this)">
+                  <span class="upload-icon">📄</span>
+                  <div class="upload-label" id="resourceUploadLabel">Click to upload PDF or document</div>
+                  <div class="upload-sub">PDF, DOCX up to 50MB</div>
+                </div>
+              </div>
+              <button class="btn-gold" onclick="submitResource()">Upload Resource</button>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span class="panel-title">Resource Library</span></div>
+            <div style="overflow-x:auto;">
+              <table class="data-table">
+                <thead><tr><th>Name</th><th>Type</th><th>Access</th><th>Downloads</th><th></th></tr></thead>
+                <tbody>
+                  <tr><td>Fat Loss Blueprint.pdf</td><td>eBook</td><td>Public</td><td>312</td><td><button class="action-btn" onclick="showToast('Edit opened')">Edit</button></td></tr>
+                  <tr><td>12-Week Bulk Plan.pdf</td><td>Workout</td><td>Pro+</td><td>88</td><td><button class="action-btn" onclick="showToast('Edit opened')">Edit</button></td></tr>
+                  <tr><td>Elite Meal Plan Dec.pdf</td><td>Meal Plan</td><td>Pro</td><td>24</td><td><button class="action-btn" onclick="showToast('Edit opened')">Edit</button></td></tr>
+                  <tr><td>Weekly Check-in Form</td><td>Form</td><td>All</td><td>156</td><td><button class="action-btn" onclick="showToast('Edit opened')">Edit</button></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PRICING ── -->
+      <div class="page" id="page-pricing">
+        <p style="font-size:13px;color:var(--gray3);margin-bottom:24px;">Edit your live pricing plans. Changes save immediately to your website.</p>
+        <div class="grid-3" id="pricingPlansContainer">
+          <!-- Filled dynamically by JS -->
+        </div>
+      </div>
+
+
+
+      <!-- ── CERTIFICATIONS ── -->
+      <div class="page" id="page-certifications">
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel-head"><span class="panel-title">Add Certification</span></div>
+            <div class="panel-body">
+              <div class="form-group">
+                <label class="form-label">Certification Name</label>
+                <input class="form-input" id="certName" placeholder="e.g. NSCA-CPT">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Issuing Body</label>
+                <input class="form-input" id="certIssuer" placeholder="e.g. National Strength and Conditioning Association">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Certificate Badge Image (optional)</label>
+                <div class="upload-zone" onclick="document.getElementById('certFile').click()">
+                  <input type="file" id="certFile" style="display:none;" onchange="updateUploadLabel('certUploadLabel', this)">
+                  <span class="upload-icon">🏅</span>
+                  <div class="upload-label" id="certUploadLabel">Click to upload certificate icon/badge</div>
+                  <div class="upload-sub">PNG, JPG up to 10MB</div>
+                </div>
+              </div>
+              <button class="btn-gold" onclick="submitCertification()">Add Certification</button>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span class="panel-title">Active Certifications</span></div>
+            <div style="overflow-x:auto;">
+              <table class="data-table">
+                <thead><tr><th>Name</th><th>Issuing Body</th><th></th></tr></thead>
+                <tbody id="certificationsTableBody">
+                  <!-- Loaded dynamically via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SETTINGS ── -->
+      <div class="page" id="page-settings">
+        <div class="grid-2">
+          <div>
+            <div class="panel" style="margin-bottom:20px;">
+              <div class="panel-head"><span class="panel-title">Profile Settings</span></div>
+              <div class="panel-body">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">First Name</label>
+                    <input class="form-input" id="settingsFirstName" value="">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Last Name</label>
+                    <input class="form-input" id="settingsLastName" value="">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Email</label>
+                  <input class="form-input" id="settingsEmail" value="">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">WhatsApp Number</label>
+                  <input class="form-input" id="settingsWhatsapp" value="">
+                </div>
+                <button class="btn-gold" onclick="saveProfileSettings()">Save Profile</button>
+              </div>
+            </div>
+            
+            <div class="panel" style="margin-bottom:20px;">
+              <div class="panel-head"><span class="panel-title">Change Password</span></div>
+              <div class="panel-body">
+                <div class="form-group">
+                  <label class="form-label">Current Password</label>
+                  <input class="form-input" type="password" id="settingsCurrentPassword" placeholder="••••••••">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">New Password</label>
+                  <input class="form-input" type="password" id="settingsNewPassword" placeholder="••••••••">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Confirm New Password</label>
+                  <input class="form-input" type="password" id="settingsConfirmNewPassword" placeholder="••••••••">
+                </div>
+                <button class="btn-gold" onclick="savePasswordSettings()">Update Password</button>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head"><span class="panel-title">Website Translations (EN / HI)</span></div>
+              <div class="panel-body">
+                <div class="form-group">
+                  <label class="form-label">Hero Title (English)</label>
+                  <input class="form-input" id="settingsHeroTitleEn">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Hero Title (Hindi)</label>
+                  <input class="form-input" id="settingsHeroTitleHi">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Hero Subtitle (English)</label>
+                  <input class="form-input" id="settingsHeroSubtitleEn">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Hero Subtitle (Hindi)</label>
+                  <input class="form-input" id="settingsHeroSubtitleHi">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">About Bio (English)</label>
+                  <textarea class="form-textarea" id="settingsAboutTextEn" style="min-height:100px;"></textarea>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">About Bio (Hindi)</label>
+                  <textarea class="form-textarea" id="settingsAboutTextHi" style="min-height:100px;"></textarea>
+                </div>
+
+                <div style="border-top:1px solid rgba(255,255,255,0.05);padding-top:16px;margin-top:16px;">
+                  <h4 style="font-size:13px;color:var(--gold);margin-bottom:12px;">Programs Translation (English / Hindi)</h4>
+                  <!-- Program 1 -->
+                  <div style="background:rgba(255,255,255,0.01);padding:12px;border:1px solid rgba(255,255,255,0.03);border-radius:4px;margin-bottom:12px;">
+                    <div style="font-size:12px;font-weight:600;color:#ccc;margin-bottom:8px;">Program 1 (Fat Loss)</div>
+                    <div class="form-row">
+                      <div class="form-group"><label class="form-label" style="font-size:10px;">Name (EN)</label><input class="form-input" id="settingsProg1NameEn" style="font-size:12px;"></div>
+                      <div class="form-group"><label class="form-label" style="font-size:10px;">Name (HI)</label><input class="form-input" id="settingsProg1NameHi" style="font-size:12px;"></div>
+                    </div>
+                    <div class="form-row">
+                      <div class="form-group"><label class="form-label" style="font-size:10px;">Desc (EN)</label><input class="form-input" id="settingsProg1DescEn" style="font-size:12px;"></div>
+                      <div class="form-group"><label class="form-label" style="font-size:10px;">Desc (HI)</label><input class="form-input" id="settingsProg1DescHi" style="font-size:12px;"></div>
+                    </div>
+                    <div class="form-row">
+                      <div class="form-group"><label class="form-label" style="font-size:10px;">Price (EN)</label><input class="form-input" id="settingsProg1PriceEn" style="font-size:12px;"></div>
+                      <div class="form-group"><label class="form-label" style="font-size:10px;">Price (HI)</label><input class="form-input" id="settingsProg1PriceHi" style="font-size:12px;"></div>
+                    </div>
+                  </div>
+                  <!-- Program 2 -->
+                  <div style="background:rgba(255,255,255,0.01);padding:12px;border:1px solid rgba(255,255,255,0.03);border-radius:4px;margin-bottom:12px;">
+                    <div style="font-size:12px;font-weight:600;color:#ccc;margin-bottom:8px;">Program 2 (Muscle Building)</div>
+                    <div class="form-row">
+                      <div class="form-group"><label class="form-label" style="font-size:10px;">Name (EN)</label><input class="form-input" id="settingsProg2NameEn" style="font-size:12px;"></div>
+                      <div class="form-group"><label class="form-label" style="font-size:10px;">Name (HI)</label><input class="form-input" id="settingsProg2NameHi" style="font-size:12px;"></div>
+                    </div>
+                    <div class="form-row">
+                      <div class="form-group"><label class="form-label" style="font-size:10px;">Desc (EN)</label><input class="form-input" id="settingsProg2DescEn" style="font-size:12px;"></div>
+                      <div class="form-group"><label class="form-label" style="font-size:10px;">Desc (HI)</label><input class="form-input" id="settingsProg2DescHi" style="font-size:12px;"></div>
+                    </div>
+                    <div class="form-row">
+                      <div class="form-group"><label class="form-label" style="font-size:10px;">Price (EN)</label><input class="form-input" id="settingsProg2PriceEn" style="font-size:12px;"></div>
+                      <div class="form-group"><label class="form-label" style="font-size:10px;">Price (HI)</label><input class="form-input" id="settingsProg2PriceHi" style="font-size:12px;"></div>
+                    </div>
+                  </div>
+                  <!-- Program 3 -->
+                  <div style="background:rgba(255,255,255,0.01);padding:12px;border:1px solid rgba(255,255,255,0.03);border-radius:4px;margin-bottom:12px;">
+                    <div style="font-size:12px;font-weight:600;color:#ccc;margin-bottom:8px;">Program 3 (Body Recomp)</div>
+                    <div class="form-row">
+                      <div class="form-group"><label class="form-label" style="font-size:10px;">Name (EN)</label><input class="form-input" id="settingsProg3NameEn" style="font-size:12px;"></div>
+                      <div class="form-group"><label class="form-label" style="font-size:10px;">Name (HI)</label><input class="form-input" id="settingsProg3NameHi" style="font-size:12px;"></div>
+                    </div>
+                    <div class="form-row">
+                      <div class="form-group"><label class="form-label" style="font-size:10px;">Desc (EN)</label><input class="form-input" id="settingsProg3DescEn" style="font-size:12px;"></div>
+                      <div class="form-group"><label class="form-label" style="font-size:10px;">Desc (HI)</label><input class="form-input" id="settingsProg3DescHi" style="font-size:12px;"></div>
+                    </div>
+                    <div class="form-row">
+                      <div class="form-group"><label class="form-label" style="font-size:10px;">Price (EN)</label><input class="form-input" id="settingsProg3PriceEn" style="font-size:12px;"></div>
+                      <div class="form-group"><label class="form-label" style="font-size:10px;">Price (HI)</label><input class="form-input" id="settingsProg3PriceHi" style="font-size:12px;"></div>
+                    </div>
+                  </div>
+                  <!-- Program 4 -->
+                  <div style="background:rgba(255,255,255,0.01);padding:12px;border:1px solid rgba(255,255,255,0.03);border-radius:4px;">
+                    <div style="font-size:12px;font-weight:600;color:#ccc;margin-bottom:8px;">Program 4 (Contest Prep)</div>
+                    <div class="form-row">
+                      <div class="form-group"><label class="form-label" style="font-size:10px;">Name (EN)</label><input class="form-input" id="settingsProg4NameEn" style="font-size:12px;"></div>
+                      <div class="form-group"><label class="form-label" style="font-size:10px;">Name (HI)</label><input class="form-input" id="settingsProg4NameHi" style="font-size:12px;"></div>
+                    </div>
+                    <div class="form-row">
+                      <div class="form-group"><label class="form-label" style="font-size:10px;">Desc (EN)</label><input class="form-input" id="settingsProg4DescEn" style="font-size:12px;"></div>
+                      <div class="form-group"><label class="form-label" style="font-size:10px;">Desc (HI)</label><input class="form-input" id="settingsProg4DescHi" style="font-size:12px;"></div>
+                    </div>
+                    <div class="form-row">
+                      <div class="form-group"><label class="form-label" style="font-size:10px;">Price (EN)</label><input class="form-input" id="settingsProg4PriceEn" style="font-size:12px;"></div>
+                      <div class="form-group"><label class="form-label" style="font-size:10px;">Price (HI)</label><input class="form-input" id="settingsProg4PriceHi" style="font-size:12px;"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <button class="btn-gold" style="margin-top:20px;width:100%;" onclick="saveSystemSettings()">Save System Settings</button>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="panel" style="margin-bottom:20px;">
+              <div class="panel-head"><span class="panel-title">Notification Settings</span></div>
+              <div class="panel-body" style="display:flex;flex-direction:column;gap:18px;">
+                <div class="toggle-wrap" onclick="toggleNotificationSetting('notifEmail')"><div class="toggle on" id="notifEmail"></div><span class="toggle-label">Email on new inquiry</span></div>
+                <div class="toggle-wrap" onclick="toggleNotificationSetting('notifWhatsapp')"><div class="toggle on" id="notifWhatsapp"></div><span class="toggle-label">WhatsApp on new booking</span></div>
+                <div class="toggle-wrap" onclick="toggleNotificationSetting('notifSms')"><div class="toggle" id="notifSms"></div><span class="toggle-label">SMS for check-in reminders</span></div>
+                <div class="toggle-wrap" onclick="toggleNotificationSetting('notifWeekly')"><div class="toggle on" id="notifWeekly"></div><span class="toggle-label">Weekly revenue summary</span></div>
+                <button class="btn-gold" style="margin-top:8px;" onclick="saveNotificationSettings()">Save Preferences</button>
+              </div>
+            </div>
+            
+            <div class="panel" style="margin-bottom:20px;">
+              <div class="panel-head"><span class="panel-title">Integrations & Payments</span></div>
+              <div class="panel-body" style="display:flex;flex-direction:column;gap:16px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.05);padding-bottom:12px;">
+                  <div><div style="font-size:14px;font-weight:600;">Google Calendar</div><div style="font-size:12px;color:var(--green);margin-top:2px;" id="statusCalendar">● Connected</div></div>
+                  <button class="action-btn" id="btnCalendar" onclick="toggleIntegration('Calendar')">Disconnect</button>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.05);padding-bottom:12px;">
+                  <div><div style="font-size:14px;font-weight:600;">Instagram Feed</div><div style="font-size:12px;color:var(--gray3);margin-top:2px;" id="statusInstagram">Not connected</div></div>
+                  <button class="action-btn gold" id="btnInstagram" onclick="toggleIntegration('Instagram')">Connect</button>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <div><div style="font-size:14px;font-weight:600;">Mailchimp</div><div style="font-size:12px;color:var(--gray3);margin-top:2px;" id="statusMailchimp">Not connected</div></div>
+                  <button class="action-btn gold" id="btnMailchimp" onclick="toggleIntegration('Mailchimp')">Connect</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Indian Market Configurations (Right Column) -->
+            <div class="panel" style="margin-bottom:20px;">
+              <div class="panel-head"><span class="panel-title">Indian Market Customizations</span></div>
+              <div class="panel-body">
+                <div class="form-group">
+                  <label class="form-label">GST Number (Optional, blank if not registered)</label>
+                  <input class="form-input" id="settingsGstNumber" placeholder="e.g. 27AAAAA1111A1Z1">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Service Area Text</label>
+                  <input class="form-input" id="settingsServiceArea">
+                </div>
+                
+                <div style="border-top:1px solid rgba(255,255,255,0.05);padding-top:16px;margin-top:16px;">
+                  <div class="toggle-wrap" style="margin-bottom:12px;" onclick="document.getElementById('settingsSeasonalActive').classList.toggle('on')">
+                    <div class="toggle" id="settingsSeasonalActive"></div>
+                    <span class="toggle-label">Enable Seasonal Offer Banner</span>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Banner Text</label>
+                    <input class="form-input" id="settingsSeasonalText" placeholder="Wedding Season Special: Get ₹1,500 off!">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Discount Value (₹)</label>
+                    <input class="form-input" type="number" id="settingsSeasonalDiscount">
+                  </div>
+                </div>
+                <button class="btn-gold" style="margin-top:10px;width:100%;" onclick="saveSystemSettings()">Save System Settings</button>
+              </div>
+            </div>
+
+            <!-- Legal Policies Editor (Right Column) -->
+            <div class="panel" style="margin-bottom:20px;">
+              <div class="panel-head"><span class="panel-title">Legal Policy Contents (HTML Allowed)</span></div>
+              <div class="panel-body">
+                <div class="form-group">
+                  <label class="form-label">Privacy Policy</label>
+                  <textarea class="form-textarea" id="settingsPrivacyPolicy" style="min-height:100px;"></textarea>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Terms of Service</label>
+                  <textarea class="form-textarea" id="settingsTermsOfService" style="min-height:100px;"></textarea>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Refund Policy</label>
+                  <textarea class="form-textarea" id="settingsRefundPolicy" style="min-height:100px;"></textarea>
+                </div>
+                <button class="btn-gold" style="width:100%;" onclick="saveSystemSettings()">Save System Settings</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Client Modal -->
+      <div id="clientModal" style="position:fixed;inset:0;margin:auto;width:100%;max-width:440px;height:fit-content;display:none;flex-direction:column;background:var(--dark2);border:1px solid var(--glass-border);box-shadow:0 8px 32px rgba(0,0,0,0.85);z-index:10000;padding:28px;border-radius:4px;">
+        <h3 style="font-family:'Bebas Neue';font-size:24px;letter-spacing:2px;margin-bottom:18px;color:var(--gold);">Add New Client</h3>
+        <div class="form-group">
+          <label class="form-label">Client Name</label>
+          <input class="form-input" id="newClientName" placeholder="e.g. Rohan Patel">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Program</label>
+          <input class="form-input" id="newClientProgram" placeholder="e.g. Fat Loss">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Plan</label>
+          <select class="form-select" id="newClientPlan">
+            <option>Basic</option><option>Pro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Check-in Date</label>
+          <input class="form-input" id="newClientCheckin" placeholder="e.g. Jan 15">
+        </div>
+        <div style="display:flex;gap:12px;margin-top:18px;">
+          <button class="btn-gold" onclick="saveNewClient()">Save Client</button>
+          <button class="btn-ghost" onclick="closeClientModal()">Cancel</button>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+    <footer style="padding:16px 32px;border-top:1px solid rgba(255,255,255,0.05);background:rgba(10,10,10,0.5);display:flex;justify-content:center;align-items:center;flex-shrink:0;">
+      <span style="font-size:11px;color:var(--gray3);letter-spacing:1px;font-family:'Inter',sans-serif;">Developed by Anush Gajbhiye</span>
+    </footer>
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<script>
+function escapeHTML(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// ── AUTHENTICATION HELPERS ──
+const API_URL = window.location.origin === 'null' || window.location.protocol === 'file:' ? 'http://localhost:5000' : '';
+
+async function apiFetch(endpoint, options = {}) {
+  const url = endpoint.startsWith('http') ? endpoint : `${API_URL}${endpoint}`;
+  const headers = {
+    ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
+    ...options.headers
+  };
+
+  const response = await fetch(url, { 
+    ...options, 
+    headers,
+    credentials: 'include'
+  });
+  
+  if (response.status === 401 || response.status === 403 || (response.status === 404 && endpoint.includes('/api/auth/me'))) {
+    // Session expired, unauthorized, or stale admin ID (e.g. database reseeded)
+    doLogout();
+    throw new Error('Unauthorized or Session Expired. Please log in again.');
+  }
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || 'API Request failed.');
+  }
+  return data;
+}
+
+// Check auth state on load
+document.addEventListener('DOMContentLoaded', async () => {
+  const app = document.getElementById('app');
+  const loginScreen = document.getElementById('loginScreen');
+
+  try {
+    const profile = await apiFetch('/api/auth/me');
+    localStorage.setItem('apex_user', JSON.stringify(profile));
+    loginScreen.classList.add('hidden');
+    app.classList.add('visible');
+    await initDashboard();
+  } catch (error) {
+    // Session is missing or invalid
+    localStorage.removeItem('apex_user');
+    loginScreen.classList.remove('hidden');
+    app.classList.remove('visible');
+  }
+});
+
+// ── LOGIN & LOGOUT ──
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPass').value;
+  const err = document.getElementById('loginError');
+
+  try {
+    const data = await apiFetch('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password })
+    });
+
+    localStorage.setItem('apex_user', JSON.stringify(data.profile));
+
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('app').classList.add('visible');
+    
+    initDashboard();
+    showToast('Logged in successfully!');
+  } catch (error) {
+    err.textContent = error.message;
+    err.style.display = 'block';
+    document.getElementById('loginPass').value = '';
+    document.getElementById('loginPass').focus();
+  }
+}
+
+async function doLogout() {
+  try {
+    await fetch(`${API_URL}/api/auth/logout`, { method: 'POST', credentials: 'include' });
+  } catch (e) {
+    console.error('Logout request failed', e);
+  }
+  localStorage.removeItem('apex_user');
+  document.getElementById('app').classList.remove('visible');
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.getElementById('loginEmail').value = '';
+  document.getElementById('loginPass').value = '';
+  document.getElementById('loginError').style.display = 'none';
+}
+
+// ── INITIALIZATION ──
+async function initDashboard() {
+  try {
+    await Promise.all([
+      loadDashboardStats(),
+      loadInquiries(),
+      loadClients(),
+      loadBookings(),
+      loadBlogPosts(),
+      loadTransformations(),
+      loadResources(),
+      loadPricingPlans(),
+      loadCertifications(),
+      loadSettings()
+    ]);
+  } catch (error) {
+    console.error('Failed to load dashboard data:', error);
+    showToast(error.message);
+  }
+}
+
+// ── TOAST ──
+let toastTimer;
+function showToast(msg) {
+  document.getElementById('toastMsg').textContent = msg;
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── SIDEBAR ──
+let collapsed = false;
+function toggleSidebar() {
+  collapsed = !collapsed;
+  document.getElementById('sidebar').classList.toggle('collapsed', collapsed);
+}
+
+// ── NAV ──
+const pageTitles = {
+  dashboard: 'Dashboard', clients: 'Clients', inquiries: 'Inquiries', bookings: 'Bookings',
+  users: 'Website Users',
+  blog: 'Blog Posts', transformations: 'Transformations', videos: 'Videos',
+  resources: 'Resources & PDFs', certifications: 'Certifications', pricing: 'Pricing', settings: 'Settings'
+};
+
+function goPage(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const page = document.getElementById('page-' + id);
+  if (page) page.classList.add('active');
+  if (el) el.classList.add('active');
+  else {
+    document.querySelectorAll('.nav-item').forEach(n => {
+      if (n.getAttribute('onclick') && n.getAttribute('onclick').includes("'" + id + "'")) n.classList.add('active');
+    });
+  }
+  document.getElementById('pageTitle').textContent = (pageTitles[id] || id).toUpperCase();
+  document.querySelector('.main').scrollTop = 0;
+  if (window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('mobile-open');
+  if (id === 'users') {
+    loadUsers();
+  }
+}
+
+// ── DASHBOARD ACTIONS ──
+async function loadDashboardStats() {
+  const stats = await apiFetch('/api/dashboard/stats');
+  
+  // Set stats DOM elements
+  const cards = document.querySelectorAll('.stat-card');
+  if (cards.length >= 2) {
+    cards[0].querySelector('.stat-value').textContent = stats.activeClientsCount;
+    cards[1].querySelector('.stat-value').textContent = stats.newInquiriesCount;
+  }
+
+  // Update navbar badges
+  const navItems = document.querySelectorAll('.sidebar-nav .nav-item');
+  navItems.forEach(item => {
+    const label = item.querySelector('.nav-label');
+    if (label) {
+      if (label.textContent === 'Clients') {
+        let badge = item.querySelector('.nav-badge');
+        if (badge) badge.textContent = stats.activeClientsCount;
+      }
+      if (label.textContent === 'Inquiries') {
+        let badge = item.querySelector('.nav-badge');
+        if (badge) {
+          badge.textContent = stats.newInquiriesCount;
+          badge.style.display = stats.newInquiriesCount > 0 ? 'inline-block' : 'none';
+        }
+      }
+    }
+  });
+}
+
+async function loadDashboardRevenueChart() {
+  const chartData = await apiFetch('/api/dashboard/revenue');
+  buildChart(chartData);
+}
+
+function buildChart(data = [120, 145, 160, 190, 175, 210, 240]) {
+  const max = Math.max(...data);
+  const el = document.getElementById('revenueChart');
+  if (!el) return;
+  el.innerHTML = data.map((v, i) => `
+    <div class="bar ${i === 6 ? 'teal' : ''}" style="height: ${Math.round((v / max) * 100)}%;"></div>
+  `).join('');
+}
+
+// ── WEBSITE USERS ──
+let allUsers = [];
+
+async function loadUsers() {
+  try {
+    allUsers = await apiFetch('/api/users');
+    renderUsersTable(allUsers);
+  } catch (error) {
+    showToast('Failed to load users: ' + error.message);
+  }
+}
+
+function renderUsersTable(users) {
+  const tbody = document.getElementById('fullUsersBody');
+  if (!tbody) return;
+  
+  if (users.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--gray3);padding:24px;">No website users registered yet.</td></tr>`;
+    document.getElementById('usersTotalCount').textContent = `Total: 0 Users`;
+    return;
+  }
+
+  tbody.innerHTML = users.map(u => {
+    const initials = escapeHTML(getInitials(u.name));
+    const phoneVal = escapeHTML(u.phone || 'N/A');
+    const signupDate = u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-IN', {
+      day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata'
+    }) + ' (IST)' : 'N/A';
+    
+    const lastLogin = u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleDateString('en-IN', {
+      day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata'
+    }) + ' (IST)' : 'N/A';
+
+    return `
+      <tr>
+        <td><span class="tbl-avatar">${initials}</span>${escapeHTML(u.name)}</td>
+        <td>${escapeHTML(u.email)}</td>
+        <td>${phoneVal}</td>
+        <td>${signupDate}</td>
+        <td>${lastLogin}</td>
+        <td>
+          <button class="action-btn gold" onclick="resetUserPassword('${u.id}', '${escapeHTML(u.name)}')">Reset Password</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+  
+  document.getElementById('usersTotalCount').textContent = `Total: ${users.length} Users`;
+}
+
+function filterUsers(q) {
+  const query = q.toLowerCase().trim();
+  if (!query) {
+    renderUsersTable(allUsers);
+    return;
+  }
+  const filtered = allUsers.filter(u => 
+    u.name.toLowerCase().includes(query) || 
+    u.email.toLowerCase().includes(query)
+  );
+  renderUsersTable(filtered);
+}
+
+async function resetUserPassword(id, name) {
+  if (!confirm(`Are you sure you want to reset the password for ${name}?`)) return;
+  try {
+    const res = await apiFetch(`/api/users/${id}/reset-password`, {
+      method: 'POST',
+      body: JSON.stringify({})
+    });
+    alert(`Password reset successful for ${name}.\n\nNew Temporary Password: ${res.tempPassword}\n\nPlease share this with the user.`);
+    loadUsers();
+  } catch (error) {
+    showToast('Failed to reset password: ' + error.message);
+  }
+}
+
+// ── CLIENTS ──
+let allClients = [];
+
+async function loadClients() {
+  allClients = await apiFetch('/api/clients');
+  renderClientTable('clientTableBody', allClients.slice(0, 6), false);
+  renderClientTable('fullClientBody', allClients, true);
+}
+
+function getInitials(name) {
+  return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+}
+
+function renderClientTable(tbodyId, data, full) {
+  const tbody = document.getElementById(tbodyId);
+  if (!tbody) return;
+
+  tbody.innerHTML = data.map(c => {
+    const escapedName = escapeHTML(c.name);
+    return `
+    <tr>
+      <td><span class="tbl-avatar">${escapeHTML(getInitials(c.name))}</span>${escapedName}</td>
+      <td>${escapeHTML(c.program)}</td>
+      <td><span class="badge badge-${escapeHTML(c.plan.toLowerCase()) === 'pro' ? 'active' : escapeHTML(c.plan.toLowerCase()) === 'basic' ? 'pending' : 'inactive'}">${escapeHTML(c.plan)}</span></td>
+      ${full ? `<td>${new Date(c.startDate).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' })}</td>` : ''}
+      <td>${escapeHTML(c.checkinDate)}</td>
+      ${full ? `<td>${new Date(c.paidUntil).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' })}</td>` : ''}
+      <td>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="prog-bar" style="width:70px;margin-top:0;flex-shrink:0;"><div class="prog-fill" style="width:${c.progress}%;"></div></div>
+          <span style="font-size:12px;color:var(--gray3);">${c.progress}%</span>
+        </div>
+      </td>
+      <td><span class="badge badge-${escapeHTML(c.status) === 'active' ? 'active' : 'inactive'}">${escapeHTML(c.status)}</span></td>
+      <td>
+        <button class="action-btn gold" onclick="showToast('Check-in triggered for ${escapedName}')">Check-in</button>
+        <button class="action-btn" onclick="deleteClient('${c.id}')">Delete</button>
+      </td>
+    </tr>
+  `;
+  }).join('');
+}
+
+function filterClients(q) {
+  const rows = document.querySelectorAll('#fullClientBody tr');
+  rows.forEach(r => {
+    r.style.display = r.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
+  });
+}
+
+function openClientModal() {
+  document.getElementById('clientModal').style.display = 'flex';
+}
+
+function closeClientModal() {
+  document.getElementById('clientModal').style.display = 'none';
+  // Clear inputs
+  document.getElementById('newClientName').value = '';
+  document.getElementById('newClientProgram').value = '';
+  document.getElementById('newClientCheckin').value = '';
+}
+
+async function saveNewClient() {
+  const name = document.getElementById('newClientName').value.trim();
+  const program = document.getElementById('newClientProgram').value.trim();
+  const plan = document.getElementById('newClientPlan').value;
+  const checkinDate = document.getElementById('newClientCheckin').value.trim();
+
+  if (!name || !program || !checkinDate) {
+    showToast('Please fill out all fields.');
+    return;
+  }
+
+  try {
+    await apiFetch('/api/clients', {
+      method: 'POST',
+      body: JSON.stringify({ name, program, plan, checkinDate, progress: 0, status: 'active' })
+    });
+    closeClientModal();
+    showToast('Client added successfully!');
+    await initDashboard();
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+async function deleteClient(id) {
+  if (!confirm('Are you sure you want to delete this client?')) return;
+  try {
+    await apiFetch(`/api/clients/${id}`, { method: 'DELETE' });
+    showToast('Client deleted.');
+    await initDashboard();
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+// ── INQUIRIES ──
+let allInquiries = [];
+
+async function loadInquiries() {
+  allInquiries = await apiFetch('/api/inquiries');
+  renderInqList('inqList', allInquiries.slice(0, 3));
+  renderInqList('fullInqList', allInquiries);
+}
+
+function renderInqList(containerId, data) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+
+  el.innerHTML = data.map(i => {
+    const isPlanRequest = i.subject && i.subject.startsWith('Plan Request:');
+    const planName = isPlanRequest ? i.subject.replace('Plan Request:', '').trim() : '';
+    const planBadge = isPlanRequest ? `<span class="badge badge-active" style="background: rgba(201, 168, 76, 0.15); color: var(--gold); border: 1px solid rgba(201, 168, 76, 0.2); margin-left: 6px;">${escapeHTML(planName)} Plan</span>` : '';
+    const phoneDisplay = i.phone ? `<div style="font-size:11px;color:var(--gray3);display:flex;align-items:center;gap:4px;">📞 <span>${escapeHTML(i.phone)}</span></div>` : '';
+    const escapedEmail = escapeHTML(i.email).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+    return `
+      <div class="inq-card" style="${i.status === 'new' ? 'border-left: 2px solid var(--teal);' : ''}">
+        <div class="inq-avatar">${escapeHTML(getInitials(i.name))}</div>
+        <div style="flex:1;min-width:0;">
+          <div class="inq-name">${escapeHTML(i.name)} <span class="badge badge-${escapeHTML(i.status) === 'new' ? 'new' : 'inactive'}" style="margin-left:6px;">${escapeHTML(i.status)}</span>${planBadge}</div>
+          <div class="inq-msg">${escapeHTML(i.message)}</div>
+          <div style="display:flex;align-items:center;gap:12px;margin-top:4px;flex-wrap:wrap;">
+            <div class="inq-time">${new Date(i.createdAt).toLocaleString('en-IN', { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' })}</div>
+            ${phoneDisplay}
+          </div>
+        </div>
+        <div class="inq-actions">
+          <a href="mailto:${escapedEmail}" class="action-btn gold" style="text-decoration:none;">Reply</a>
+          ${i.status === 'new' ? `<button class="action-btn" onclick="markInquiryRead('${i.id}')">✓</button>` : ''}
+          <button class="action-btn" onclick="deleteInquiry('${i.id}')">🗑️</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function markInquiryRead(id) {
+  try {
+    await apiFetch(`/api/inquiries/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ status: 'read' })
+    });
+    showToast('Inquiry marked as read.');
+    await initDashboard();
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+async function deleteInquiry(id) {
+  if (!confirm('Delete this inquiry?')) return;
+  try {
+    await apiFetch(`/api/inquiries/${id}`, { method: 'DELETE' });
+    showToast('Inquiry deleted.');
+    await initDashboard();
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+// ── BOOKINGS ──
+async function loadBookings() {
+  const bookings = await apiFetch('/api/bookings');
+  
+  // Aggregate stats
+  const totalThisWeek = bookings.length;
+  const pending = bookings.filter(b => b.status === 'pending').length;
+  const confirmed = bookings.filter(b => b.status === 'confirmed').length;
+
+  const cards = document.getElementById('page-bookings').querySelectorAll('.stat-card');
+  if (cards.length >= 3) {
+    cards[0].querySelector('.stat-value').textContent = totalThisWeek;
+    cards[1].querySelector('.stat-value').textContent = pending;
+    cards[2].querySelector('.stat-value').textContent = confirmed;
+  }
+
+  // Render Table
+  const tbody = document.getElementById('page-bookings').querySelector('.data-table tbody');
+  if (tbody) {
+    tbody.innerHTML = bookings.map(b => {
+      const escapedName = escapeHTML(b.name);
+      const escapedProgram = escapeHTML(b.programInterest);
+      const escapedStatus = escapeHTML(b.status);
+      return `
+      <tr>
+        <td><span class="tbl-avatar">${escapeHTML(getInitials(b.name))}</span>${escapedName}</td>
+        <td>${new Date(b.dateTime).toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</td>
+        <td>${escapedProgram}</td>
+        <td><span class="badge badge-${escapedStatus === 'confirmed' ? 'active' : escapedStatus === 'declined' ? 'inactive' : 'pending'}">${escapedStatus}</span></td>
+        <td>
+          ${escapedStatus === 'pending' ? `
+            <button class="action-btn gold" onclick="updateBookingStatus('${b.id}', 'confirmed')">Approve</button>
+            <button class="action-btn" onclick="updateBookingStatus('${b.id}', 'declined')">Decline</button>
+          ` : `
+            <button class="action-btn" onclick="showToast('Reminder email logged to server console!')">Send Reminder</button>
+          `}
+          <button class="action-btn" onclick="deleteBooking('${b.id}')">Delete</button>
+        </td>
+      </tr>
+    `;
+    }).join('');
+  }
+}
+
+async function updateBookingStatus(id, status) {
+  try {
+    await apiFetch(`/api/bookings/${id}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status })
+    });
+    showToast(`Booking ${status} successfully!`);
+    await initDashboard();
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+async function deleteBooking(id) {
+  if (!confirm('Are you sure you want to delete this booking?')) return;
+  try {
+    await apiFetch(`/api/bookings/${id}`, { method: 'DELETE' });
+    showToast('Booking deleted.');
+    await initDashboard();
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+// ── FILE LABELS HELPER ──
+function updateUploadLabel(labelId, input) {
+  const label = document.getElementById(labelId);
+  if (input.files && input.files.length > 0) {
+    label.textContent = `File selected: ${input.files[0].name}`;
+    label.style.color = 'var(--gold)';
+  } else {
+    label.textContent = labelId.includes('Cover') ? 'Click to upload cover image' : 'Click to upload';
+    label.style.color = '';
+  }
+}
+
+// ── BLOG POSTS ──
+async function loadBlogPosts() {
+  const posts = await apiFetch('/api/blog');
+  const tbody = document.getElementById('page-blog').querySelector('.data-table tbody');
+  if (tbody) {
+    tbody.innerHTML = posts.map(p => {
+      const escapedStatus = escapeHTML(p.status);
+      return `
+      <tr>
+        <td>${escapeHTML(p.title)}</td>
+        <td>${escapeHTML(p.category)}</td>
+        <td>${new Date(p.createdAt).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}</td>
+        <td><span class="badge badge-${escapedStatus === 'published' ? 'active' : 'inactive'}">${escapedStatus}</span></td>
+        <td>
+          <button class="action-btn gold" onclick="editBlogPost('${p.id}')">Edit</button>
+          <button class="action-btn" onclick="deleteBlogPost('${p.id}')">🗑️</button>
+        </td>
+      </tr>
+    `;
+    }).join('');
+  }
+}
+
+let editingBlogId = null;
+
+async function submitBlogPost(saveAsDraft = false) {
+  const title = document.getElementById('blogTitle').value.trim();
+  const category = document.getElementById('blogCategory').value;
+  const content = document.getElementById('blogContent').value.trim();
+  const coverFile = document.getElementById('blogCoverFile').files[0];
+
+  if (!title || !category || !content) {
+    showToast('Please fill out Title, Category, and Content.');
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('title', title);
+  formData.append('category', category);
+  formData.append('content', content);
+  formData.append('status', saveAsDraft ? 'draft' : 'published');
+  if (coverFile) {
+    formData.append('coverImage', coverFile);
+  }
+
+  try {
+    const url = editingBlogId ? `/api/blog/${editingBlogId}` : '/api/blog';
+    const method = editingBlogId ? 'PUT' : 'POST';
+
+    await apiFetch(url, { method, body: formData });
+    
+    showToast(editingBlogId ? 'Post updated!' : 'Post published!');
+    clearBlogForm();
+    await initDashboard();
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+function clearBlogForm() {
+  editingBlogId = null;
+  document.getElementById('blogTitle').value = '';
+  document.getElementById('blogCategory').value = 'Nutrition';
+  document.getElementById('blogContent').value = '';
+  document.getElementById('blogCoverFile').value = '';
+  document.getElementById('blogUploadLabel').textContent = 'Click to upload cover image';
+  document.getElementById('blogUploadLabel').style.color = '';
+  
+  const panelTitle = document.getElementById('page-blog').querySelector('.panel-title');
+  if (panelTitle) panelTitle.textContent = 'Write New Post';
+}
+
+async function editBlogPost(id) {
+  const posts = await apiFetch(`/api/blog`);
+  const selected = posts.find(p => p.id === id);
+  if (!selected) return;
+
+  editingBlogId = id;
+  document.getElementById('blogTitle').value = selected.title;
+  document.getElementById('blogCategory').value = selected.category;
+  document.getElementById('blogContent').value = selected.content;
+  if (selected.coverImage) {
+    document.getElementById('blogUploadLabel').textContent = 'Change Cover Image (exists)';
+    document.getElementById('blogUploadLabel').style.color = 'var(--gold)';
+  } else {
+    document.getElementById('blogUploadLabel').textContent = 'Click to upload cover image';
+    document.getElementById('blogUploadLabel').style.color = '';
+  }
+
+  const panelTitle = document.getElementById('page-blog').querySelector('.panel-title');
+  if (panelTitle) panelTitle.textContent = 'Edit Blog Post';
+  
+  showToast('Loaded blog post into editor');
+}
+
+async function deleteBlogPost(id) {
+  if (!confirm('Are you sure you want to delete this blog post?')) return;
+  try {
+    await apiFetch(`/api/blog/${id}`, { method: 'DELETE' });
+    showToast('Post deleted.');
+    await initDashboard();
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+// ── TRANSFORMATIONS ──
+async function loadTransformations() {
+  const list = await apiFetch('/api/transformations');
+  const tbody = document.getElementById('page-transformations').querySelector('.data-table tbody');
+  
+  const header = document.getElementById('page-transformations').querySelector('.panel-title');
+  if (header) header.textContent = `All Transformations (${list.length})`;
+
+  if (tbody) {
+    tbody.innerHTML = list.map(t => {
+      const escapedStatus = escapeHTML(t.status);
+      return `
+      <tr>
+        <td>${escapeHTML(t.clientName)}</td>
+        <td><span style="color:var(--green);">${escapeHTML(t.result)}</span></td>
+        <td>${escapeHTML(t.programType)}</td>
+        <td><span class="badge badge-${escapedStatus === 'live' ? 'active' : 'pending'}">${escapedStatus}</span></td>
+        <td>
+          <button class="action-btn gold" onclick="editTransformation('${t.id}')" style="margin-right:4px;">Edit</button>
+          <button class="action-btn" onclick="deleteTransformation('${t.id}')">Delete</button>
+        </td>
+      </tr>
+    `;
+    }).join('');
+  }
+}
+
+let consentValue = false;
+function toggleConsentToggle() {
+  consentValue = !consentValue;
+  document.getElementById('transConsent').classList.toggle('on', consentValue);
+}
+
+let editingTransformationId = null;
+
+async function editTransformation(id) {
+  try {
+    const list = await apiFetch('/api/transformations');
+    const t = list.find(item => item.id === id);
+    if (!t) return;
+
+    editingTransformationId = id;
+    document.getElementById('transClientName').value = t.clientName;
+    document.getElementById('transDuration').value = t.duration;
+    document.getElementById('transResult').value = t.result;
+    document.getElementById('transProgramType').value = t.programType;
+    document.getElementById('transTestimonial').value = t.testimonial || '';
+    document.getElementById('transVideoUrl').value = t.videoUrl || '';
+    
+    consentValue = t.consent;
+    if (consentValue) {
+      document.getElementById('transConsent').classList.add('on');
+    } else {
+      document.getElementById('transConsent').classList.remove('on');
+    }
+
+    // Update labels to show photos exist
+    document.getElementById('transBeforeLabel').textContent = t.beforeImage ? 'Change Before Photo (exists)' : 'Before';
+    if (t.beforeImage) document.getElementById('transBeforeLabel').style.color = 'var(--gold)';
+    
+    document.getElementById('transAfterLabel').textContent = t.afterImage ? 'Change After Photo (exists)' : 'After';
+    if (t.afterImage) document.getElementById('transAfterLabel').style.color = 'var(--gold)';
+
+    // Update panel title and button text
+    const panel = document.getElementById('page-transformations');
+    const title = panel.querySelector('.panel-title');
+    if (title) title.textContent = 'Edit Transformation';
+
+    const submitBtn = panel.querySelector('.btn-gold');
+    if (submitBtn) submitBtn.textContent = 'Save Transformation';
+
+    // Show a cancel button if not already present
+    let cancelBtn = document.getElementById('transCancelBtn');
+    if (!cancelBtn) {
+      cancelBtn = document.createElement('button');
+      cancelBtn.id = 'transCancelBtn';
+      cancelBtn.className = 'action-btn';
+      cancelBtn.style.marginLeft = '10px';
+      cancelBtn.style.padding = '8px 16px';
+      cancelBtn.style.verticalAlign = 'middle';
+      cancelBtn.textContent = 'Cancel';
+      cancelBtn.type = 'button';
+      cancelBtn.onclick = clearTransformationForm;
+      submitBtn.parentNode.appendChild(cancelBtn);
+    }
+  } catch (error) {
+    showToast('Failed to load transformation for editing: ' + error.message);
+  }
+}
+
+async function submitTransformation() {
+  const clientName = document.getElementById('transClientName').value.trim();
+  const duration = document.getElementById('transDuration').value.trim();
+  const result = document.getElementById('transResult').value.trim();
+  const programType = document.getElementById('transProgramType').value;
+  const testimonial = document.getElementById('transTestimonial').value.trim();
+  const videoUrl = document.getElementById('transVideoUrl').value.trim();
+  const beforeFile = document.getElementById('transBeforeFile').files[0];
+  const afterFile = document.getElementById('transAfterFile').files[0];
+
+  if (!clientName || !duration || !result) {
+    showToast('Please fill out name, duration, and result.');
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('clientName', clientName);
+  formData.append('duration', duration);
+  formData.append('result', result);
+  formData.append('programType', programType);
+  formData.append('testimonial', testimonial);
+  formData.append('videoUrl', videoUrl);
+  formData.append('consent', consentValue);
+  formData.append('status', 'live');
+  if (beforeFile) formData.append('beforeImage', beforeFile);
+  if (afterFile) formData.append('afterImage', afterFile);
+
+  try {
+    const url = editingTransformationId ? `/api/transformations/${editingTransformationId}` : '/api/transformations';
+    const method = editingTransformationId ? 'PUT' : 'POST';
+
+    await apiFetch(url, {
+      method: method,
+      body: formData
+    });
+    showToast(editingTransformationId ? 'Transformation updated!' : 'Transformation uploaded!');
+    clearTransformationForm();
+    await initDashboard();
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+function clearTransformationForm() {
+  editingTransformationId = null;
+  document.getElementById('transClientName').value = '';
+  document.getElementById('transDuration').value = '';
+  document.getElementById('transResult').value = '';
+  document.getElementById('transTestimonial').value = '';
+  document.getElementById('transVideoUrl').value = '';
+  document.getElementById('transBeforeFile').value = '';
+  document.getElementById('transAfterFile').value = '';
+  document.getElementById('transBeforeLabel').textContent = 'Before';
+  document.getElementById('transBeforeLabel').style.color = '';
+  document.getElementById('transAfterLabel').textContent = 'After';
+  document.getElementById('transAfterLabel').style.color = '';
+  consentValue = false;
+  document.getElementById('transConsent').classList.remove('on');
+
+  const panel = document.getElementById('page-transformations');
+  const title = panel.querySelector('.panel-title');
+  if (title) title.textContent = 'Add Transformation';
+
+  const submitBtn = panel.querySelector('.btn-gold');
+  if (submitBtn) submitBtn.textContent = 'Upload Transformation';
+
+  const cancelBtn = document.getElementById('transCancelBtn');
+  if (cancelBtn) {
+    cancelBtn.remove();
+  }
+}
+
+async function deleteTransformation(id) {
+  if (!confirm('Are you sure you want to delete this transformation?')) return;
+  try {
+    await apiFetch(`/api/transformations/${id}`, { method: 'DELETE' });
+    showToast('Transformation deleted.');
+    await initDashboard();
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+
+
+// ── RESOURCES ──
+async function loadResources() {
+  const list = await apiFetch('/api/resources');
+  const tbody = document.getElementById('page-resources').querySelector('.data-table tbody');
+  if (tbody) {
+    tbody.innerHTML = list.map(r => `
+      <tr>
+        <td>${escapeHTML(r.name)} ${r.isVegFriendly ? '<span style="color:#22c55e;font-size:11px;margin-left:4px;">● Veg</span>' : ''}</td>
+        <td>${escapeHTML(r.type)}</td>
+        <td>${escapeHTML(r.access)}</td>
+        <td>${r.downloads}</td>
+        <td>
+          <button class="action-btn" onclick="deleteResource('${r.id}')">Delete</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+}
+
+async function submitResource() {
+  const name = document.getElementById('resourceTitle').value.trim();
+  const type = document.getElementById('resourceType').value;
+  const access = document.getElementById('resourceAccess').value;
+  const isVegFriendly = document.getElementById('resourceVegFriendly').classList.contains('on');
+  const file = document.getElementById('resourceFile').files[0];
+
+  if (!name || !file) {
+    showToast('Please enter Title and select a PDF file.');
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('name', name);
+  formData.append('type', type);
+  formData.append('access', access);
+  formData.append('isVegFriendly', isVegFriendly);
+  formData.append('file', file);
+
+  try {
+    await apiFetch('/api/resources', {
+      method: 'POST',
+      body: formData
+    });
+    showToast('Resource uploaded!');
+    document.getElementById('resourceTitle').value = '';
+    document.getElementById('resourceFile').value = '';
+    document.getElementById('resourceVegFriendly').classList.remove('on');
+    document.getElementById('resourceUploadLabel').textContent = 'Click to upload PDF or document';
+    document.getElementById('resourceUploadLabel').style.color = '';
+    await initDashboard();
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+async function deleteResource(id) {
+  if (!confirm('Delete this resource?')) return;
+  try {
+    await apiFetch(`/api/resources/${id}`, { method: 'DELETE' });
+    showToast('Resource deleted.');
+    await initDashboard();
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+// ── CERTIFICATIONS ──
+async function loadCertifications() {
+  const tbody = document.getElementById('certificationsTableBody');
+  if (!tbody) return;
+  
+  try {
+    const list = await apiFetch('/api/certifications');
+    tbody.innerHTML = list.map(c => {
+      const imgUrl = c.imageUrl ? (c.imageUrl.startsWith('http') ? c.imageUrl : API_URL + c.imageUrl) : '';
+      const escapedImg = escapeHTML(imgUrl).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+      const titleVal = c.title || c.name;
+      return `
+        <tr>
+          <td>
+            ${imgUrl ? `<img src="${escapedImg}" style="width:40px;height:40px;object-fit:cover;border-radius:2px;margin-right:8px;vertical-align:middle;">` : ''}
+            <span style="vertical-align:middle;">${escapeHTML(titleVal)}</span>
+          </td>
+          <td>${escapeHTML(c.issuingBody)}</td>
+          <td>
+            <button class="action-btn" onclick="deleteCertification('${c.id}')">Delete</button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+async function submitCertification() {
+  const name = document.getElementById('certName').value.trim();
+  const issuingBody = document.getElementById('certIssuer').value.trim();
+  const file = document.getElementById('certFile').files[0];
+
+  if (!name || !issuingBody) {
+    showToast('Please fill out Certification Name and Issuing Body.');
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('title', name);
+  formData.append('issuingBody', issuingBody);
+  if (file) formData.append('certificateImage', file);
+
+  try {
+    await apiFetch('/api/certifications', {
+      method: 'POST',
+      body: formData
+    });
+    showToast('Certification added!');
+    document.getElementById('certName').value = '';
+    document.getElementById('certIssuer').value = '';
+    document.getElementById('certFile').value = '';
+    document.getElementById('certUploadLabel').textContent = 'Click to upload certificate icon/badge';
+    document.getElementById('certUploadLabel').style.color = '';
+    await loadCertifications();
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+async function deleteCertification(id) {
+  if (!confirm('Are you sure you want to delete this certification?')) return;
+  try {
+    await apiFetch(`/api/certifications/${id}`, { method: 'DELETE' });
+    showToast('Certification deleted.');
+    await loadCertifications();
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+// ── PRICING PLANS ──
+let loadedPlans = [];
+
+async function loadPricingPlans() {
+  loadedPlans = await apiFetch('/api/pricing');
+  renderPricingPlans(loadedPlans);
+}
+
+function renderPricingPlans(plans) {
+  const container = document.getElementById('pricingPlansContainer');
+  if (!container) return;
+
+  container.innerHTML = plans.map(p => {
+    const nameEscaped = escapeHTML(p.name);
+    const nameHindiEscaped = escapeHTML(p.nameHindi || '');
+    const featuresEscaped = escapeHTML(p.features);
+    const featuresHindiEscaped = escapeHTML(p.featuresHindi || '');
+    return `
+    <div class="panel" id="plan-card-${p.id}" ${p.name.toLowerCase() === 'pro' ? 'style="border-color:rgba(201,168,76,0.3);"' : ''}>
+      <div class="panel-head" ${p.name.toLowerCase() === 'pro' ? 'style="border-color:rgba(201,168,76,0.15);"' : ''}>
+        <span class="panel-title" ${p.name.toLowerCase() === 'pro' ? 'style="color:var(--gold);"' : ''}>
+          ${nameEscaped} Plan ${p.name.toLowerCase() === 'pro' ? '★' : ''}
+        </span>
+      </div>
+      <div class="panel-body">
+        <div class="form-group">
+          <label class="form-label">Plan Name (English)</label>
+          <input class="form-input" id="planName-${p.id}" value="${nameEscaped}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Plan Name (Hindi)</label>
+          <input class="form-input" id="planNameHindi-${p.id}" value="${nameHindiEscaped}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Price (₹ / month)</label>
+          <input class="form-input" type="number" id="planPrice-${p.id}" value="${p.price}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Features (English, one per line)</label>
+          <textarea class="form-textarea" id="planFeatures-${p.id}" style="min-height:110px;">${featuresEscaped}</textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Features (Hindi, one per line)</label>
+          <textarea class="form-textarea" id="planFeaturesHindi-${p.id}" style="min-height:110px;">${featuresHindiEscaped}</textarea>
+        </div>
+        <div class="toggle-wrap" style="margin-bottom:12px;" onclick="document.getElementById('planVegActive-${p.id}').classList.toggle('on')">
+          <div class="toggle ${p.isVegFriendly ? 'on' : ''}" id="planVegActive-${p.id}"></div>
+          <span class="toggle-label">Mark as Vegetarian-Friendly</span>
+        </div>
+        <div class="toggle-wrap" style="margin-bottom:16px;" onclick="togglePlanActive('${p.id}')">
+          <div class="toggle ${p.isActive ? 'on' : ''}" id="planActive-${p.id}"></div>
+          <span class="toggle-label">Plan is active</span>
+        </div>
+        <button class="btn-gold" style="width:100%;justify-content:center;" onclick="savePricingPlan('${p.id}')">Save Changes</button>
+      </div>
+    </div>
+  `;
+  }).join('');
+}
+
+function togglePlanActive(id) {
+  const toggle = document.getElementById(`planActive-${id}`);
+  if (toggle) {
+    toggle.classList.toggle('on');
+  }
+}
+
+async function savePricingPlan(id) {
+  const name = document.getElementById(`planName-${id}`).value.trim();
+  const nameHindi = document.getElementById(`planNameHindi-${id}`).value.trim();
+  const price = document.getElementById(`planPrice-${id}`).value;
+  const features = document.getElementById(`planFeatures-${id}`).value.trim();
+  const featuresHindi = document.getElementById(`planFeaturesHindi-${id}`).value.trim();
+  const isActive = document.getElementById(`planActive-${id}`).classList.contains('on');
+  const isVegFriendly = document.getElementById(`planVegActive-${id}`).classList.contains('on');
+
+  try {
+    await apiFetch(`/api/pricing/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ name, nameHindi, price, features, featuresHindi, isActive, isVegFriendly })
+    });
+    showToast(`${name} plan details saved successfully!`);
+    await initDashboard();
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+// ── SETTINGS ──
+let adminSettings = null;
+
+async function loadSettings() {
+  adminSettings = await apiFetch('/api/auth/me');
+  
+  // Populate form
+  document.getElementById('settingsFirstName').value = adminSettings.firstName;
+  document.getElementById('settingsLastName').value = adminSettings.lastName;
+  document.getElementById('settingsEmail').value = adminSettings.email;
+  document.getElementById('settingsWhatsapp').value = adminSettings.whatsapp;
+
+  // Render Sidebar profile
+  const avatar = document.querySelector('.sidebar-avatar');
+  if (avatar) avatar.textContent = getInitials(adminSettings.firstName + ' ' + adminSettings.lastName);
+  const nameLabel = document.querySelector('.sidebar-user-name');
+  if (nameLabel) nameLabel.textContent = `${adminSettings.firstName} ${adminSettings.lastName}`;
+
+  // Toggles
+  setToggleState('notifEmail', adminSettings.notifEmailInquiry);
+  setToggleState('notifWhatsapp', adminSettings.notifWhatsappBooking);
+  setToggleState('notifSms', adminSettings.notifSmsReminder);
+  setToggleState('notifWeekly', adminSettings.notifWeeklySummary);
+
+  // Integrations state
+  updateIntegrationUI('Calendar', adminSettings.integrationCalendarConnected);
+  updateIntegrationUI('Instagram', adminSettings.integrationInstagramConnected);
+  updateIntegrationUI('Mailchimp', adminSettings.integrationMailchimpConnected);
+
+  // Key configurations
+  document.getElementById('settingsGstNumber').value = adminSettings.gstNumber || '';
+  document.getElementById('settingsServiceArea').value = adminSettings.serviceArea || '';
+  const seasonalToggle = document.getElementById('settingsSeasonalActive');
+  if (seasonalToggle) {
+    seasonalToggle.classList.toggle('on', !!adminSettings.seasonalBannerActive);
+  }
+  document.getElementById('settingsSeasonalText').value = adminSettings.seasonalBannerText || '';
+  document.getElementById('settingsSeasonalDiscount').value = adminSettings.seasonalBannerDiscount || 0;
+
+  document.getElementById('settingsPrivacyPolicy').value = adminSettings.privacyPolicy || '';
+  document.getElementById('settingsTermsOfService').value = adminSettings.termsOfService || '';
+  document.getElementById('settingsRefundPolicy').value = adminSettings.refundPolicy || '';
+
+  document.getElementById('settingsHeroTitleEn').value = adminSettings.heroTitleEn || '';
+  document.getElementById('settingsHeroTitleHi').value = adminSettings.heroTitleHi || '';
+  document.getElementById('settingsHeroSubtitleEn').value = adminSettings.heroSubtitleEn || '';
+  document.getElementById('settingsHeroSubtitleHi').value = adminSettings.heroSubtitleHi || '';
+  document.getElementById('settingsAboutTextEn').value = adminSettings.aboutTextEn || '';
+  document.getElementById('settingsAboutTextHi').value = adminSettings.aboutTextHi || '';
+
+  document.getElementById('settingsProg1NameEn').value = adminSettings.prog1NameEn || '';
+  document.getElementById('settingsProg1NameHi').value = adminSettings.prog1NameHi || '';
+  document.getElementById('settingsProg1DescEn').value = adminSettings.prog1DescEn || '';
+  document.getElementById('settingsProg1DescHi').value = adminSettings.prog1DescHi || '';
+  document.getElementById('settingsProg1PriceEn').value = adminSettings.prog1PriceEn || '';
+  document.getElementById('settingsProg1PriceHi').value = adminSettings.prog1PriceHi || '';
+
+  document.getElementById('settingsProg2NameEn').value = adminSettings.prog2NameEn || '';
+  document.getElementById('settingsProg2NameHi').value = adminSettings.prog2NameHi || '';
+  document.getElementById('settingsProg2DescEn').value = adminSettings.prog2DescEn || '';
+  document.getElementById('settingsProg2DescHi').value = adminSettings.prog2DescHi || '';
+  document.getElementById('settingsProg2PriceEn').value = adminSettings.prog2PriceEn || '';
+  document.getElementById('settingsProg2PriceHi').value = adminSettings.prog2PriceHi || '';
+
+  document.getElementById('settingsProg3NameEn').value = adminSettings.prog3NameEn || '';
+  document.getElementById('settingsProg3NameHi').value = adminSettings.prog3NameHi || '';
+  document.getElementById('settingsProg3DescEn').value = adminSettings.prog3DescEn || '';
+  document.getElementById('settingsProg3DescHi').value = adminSettings.prog3DescHi || '';
+  document.getElementById('settingsProg3PriceEn').value = adminSettings.prog3PriceEn || '';
+  document.getElementById('settingsProg3PriceHi').value = adminSettings.prog3PriceHi || '';
+
+  document.getElementById('settingsProg4NameEn').value = adminSettings.prog4NameEn || '';
+  document.getElementById('settingsProg4NameHi').value = adminSettings.prog4NameHi || '';
+  document.getElementById('settingsProg4DescEn').value = adminSettings.prog4DescEn || '';
+  document.getElementById('settingsProg4DescHi').value = adminSettings.prog4DescHi || '';
+  document.getElementById('settingsProg4PriceEn').value = adminSettings.prog4PriceEn || '';
+  document.getElementById('settingsProg4PriceHi').value = adminSettings.prog4PriceHi || '';
+}
+
+function setToggleState(id, isActive) {
+  const toggle = document.getElementById(id);
+  if (toggle) {
+    toggle.classList.toggle('on', isActive);
+  }
+}
+
+function toggleNotificationSetting(id) {
+  const toggle = document.getElementById(id);
+  if (toggle) {
+    toggle.classList.toggle('on');
+  }
+}
+
+async function saveProfileSettings() {
+  const email = document.getElementById('settingsEmail').value.trim();
+  const firstName = document.getElementById('settingsFirstName').value.trim();
+  const lastName = document.getElementById('settingsLastName').value.trim();
+  const whatsapp = document.getElementById('settingsWhatsapp').value.trim();
+
+  try {
+    await apiFetch('/api/auth/profile', {
+      method: 'PUT',
+      body: JSON.stringify({ email, firstName, lastName, whatsapp })
+    });
+    showToast('Profile updated!');
+    await loadSettings();
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+async function savePasswordSettings() {
+  const currentPassword = document.getElementById('settingsCurrentPassword').value;
+  const newPassword = document.getElementById('settingsNewPassword').value;
+  const confirmPassword = document.getElementById('settingsConfirmNewPassword').value;
+
+  if (!currentPassword || !newPassword) {
+    showToast('Please fill out current and new password.');
+    return;
+  }
+
+  if (newPassword !== confirmPassword) {
+    showToast('New passwords do not match.');
+    return;
+  }
+
+  try {
+    await apiFetch('/api/auth/password', {
+      method: 'PUT',
+      body: JSON.stringify({ currentPassword, newPassword })
+    });
+    showToast('Password updated successfully!');
+    document.getElementById('settingsCurrentPassword').value = '';
+    document.getElementById('settingsNewPassword').value = '';
+    document.getElementById('settingsConfirmNewPassword').value = '';
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+async function saveNotificationSettings() {
+  showToast('Notification preferences saved ✓');
+}
+
+async function saveSystemSettings() {
+  const settings = {
+    gstNumber: document.getElementById('settingsGstNumber').value,
+    serviceArea: document.getElementById('settingsServiceArea').value,
+    seasonalBannerActive: document.getElementById('settingsSeasonalActive').classList.contains('on'),
+    seasonalBannerText: document.getElementById('settingsSeasonalText').value,
+    seasonalBannerDiscount: parseInt(document.getElementById('settingsSeasonalDiscount').value) || 0,
+    
+    privacyPolicy: document.getElementById('settingsPrivacyPolicy').value,
+    termsOfService: document.getElementById('settingsTermsOfService').value,
+    refundPolicy: document.getElementById('settingsRefundPolicy').value,
+    
+    heroTitleEn: document.getElementById('settingsHeroTitleEn').value,
+    heroTitleHi: document.getElementById('settingsHeroTitleHi').value,
+    heroSubtitleEn: document.getElementById('settingsHeroSubtitleEn').value,
+    heroSubtitleHi: document.getElementById('settingsHeroSubtitleHi').value,
+    aboutTextEn: document.getElementById('settingsAboutTextEn').value,
+    aboutTextHi: document.getElementById('settingsAboutTextHi').value,
+    
+    prog1NameEn: document.getElementById('settingsProg1NameEn').value,
+    prog1NameHi: document.getElementById('settingsProg1NameHi').value,
+    prog1DescEn: document.getElementById('settingsProg1DescEn').value,
+    prog1DescHi: document.getElementById('settingsProg1DescHi').value,
+    prog1PriceEn: document.getElementById('settingsProg1PriceEn').value,
+    prog1PriceHi: document.getElementById('settingsProg1PriceHi').value,
+
+    prog2NameEn: document.getElementById('settingsProg2NameEn').value,
+    prog2NameHi: document.getElementById('settingsProg2NameHi').value,
+    prog2DescEn: document.getElementById('settingsProg2DescEn').value,
+    prog2DescHi: document.getElementById('settingsProg2DescHi').value,
+    prog2PriceEn: document.getElementById('settingsProg2PriceEn').value,
+    prog2PriceHi: document.getElementById('settingsProg2PriceHi').value,
+
+    prog3NameEn: document.getElementById('settingsProg3NameEn').value,
+    prog3NameHi: document.getElementById('settingsProg3NameHi').value,
+    prog3DescEn: document.getElementById('settingsProg3DescEn').value,
+    prog3DescHi: document.getElementById('settingsProg3DescHi').value,
+    prog3PriceEn: document.getElementById('settingsProg3PriceEn').value,
+    prog3PriceHi: document.getElementById('settingsProg3PriceHi').value,
+
+    prog4NameEn: document.getElementById('settingsProg4NameEn').value,
+    prog4NameHi: document.getElementById('settingsProg4NameHi').value,
+    prog4DescEn: document.getElementById('settingsProg4DescEn').value,
+    prog4DescHi: document.getElementById('settingsProg4DescHi').value,
+    prog4PriceEn: document.getElementById('settingsProg4PriceEn').value,
+    prog4PriceHi: document.getElementById('settingsProg4PriceHi').value
+  };
+
+  try {
+    await apiFetch('/api/auth/settings', {
+      method: 'PUT',
+      body: JSON.stringify(settings)
+    });
+    showToast('System settings saved successfully!');
+    await loadSettings();
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+function updateIntegrationUI(name, isConnected) {
+  const status = document.getElementById(`status${name}`);
+  const btn = document.getElementById(`btn${name}`);
+  if (!status || !btn) return;
+
+  if (isConnected) {
+    status.textContent = '● Connected';
+    status.style.color = 'var(--green)';
+    btn.textContent = 'Disconnect';
+    btn.className = 'action-btn';
+  } else {
+    status.textContent = 'Not connected';
+    status.style.color = 'var(--gray3)';
+    btn.textContent = 'Connect';
+    btn.className = 'action-btn gold';
+  }
+}
+
+function toggleIntegration(name) {
+  const status = document.getElementById(`status${name}`);
+  const isConnected = status.textContent.includes('Connected');
+  updateIntegrationUI(name, !isConnected);
+  showToast(`${name} integration ${!isConnected ? 'connected!' : 'disconnected.'}`);
+}
+
+// ── MOBILE RESPONSIVENESS ──
+const menuBtn = document.getElementById('menuBtn');
+if (menuBtn) {
+  menuBtn.addEventListener('click', () => {
+    document.getElementById('sidebar').classList.toggle('mobile-open');
+  });
+}
+</script>
+</body>
+</html>
