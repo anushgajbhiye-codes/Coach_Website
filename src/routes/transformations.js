@@ -81,6 +81,7 @@ router.post(
   '/',
   authenticateToken,
   upload.fields([
+    { name: 'coverImage', maxCount: 1 },
     { name: 'beforeImage', maxCount: 1 },
     { name: 'afterImage', maxCount: 1 }
   ]),
@@ -91,6 +92,7 @@ router.post(
         return res.status(400).json({ error: 'Client name, duration, result, and program type are required.' });
       }
 
+      const coverUrl = req.files && req.files['coverImage'] ? await compressAndSaveImage(req.files['coverImage'][0], 'cover') : null;
       const beforeUrl = req.files && req.files['beforeImage'] ? await compressAndSaveImage(req.files['beforeImage'][0], 'before') : null;
       const afterUrl = req.files && req.files['afterImage'] ? await compressAndSaveImage(req.files['afterImage'][0], 'after') : null;
 
@@ -104,6 +106,7 @@ router.post(
           videoUrl: videoUrl ? videoUrl.trim() : null,
           consent: consent === 'true' || consent === true,
           status: status || 'live',
+          coverImage: coverUrl,
           beforeImage: beforeUrl,
           afterImage: afterUrl
         }
@@ -121,6 +124,7 @@ router.put(
   '/:id',
   authenticateToken,
   upload.fields([
+    { name: 'coverImage', maxCount: 1 },
     { name: 'beforeImage', maxCount: 1 },
     { name: 'afterImage', maxCount: 1 }
   ]),
@@ -131,6 +135,12 @@ router.put(
 
       const existing = await prisma.transformation.findUnique({ where: { id } });
       if (!existing) return res.status(404).json({ error: 'Transformation entry not found.' });
+
+      let coverUrl = existing.coverImage;
+      if (req.files && req.files['coverImage']) {
+        coverUrl = await compressAndSaveImage(req.files['coverImage'][0], 'cover');
+        deleteLocalFile(existing.coverImage);
+      }
 
       let beforeUrl = existing.beforeImage;
       if (req.files && req.files['beforeImage']) {
@@ -155,6 +165,7 @@ router.put(
           videoUrl: videoUrl !== undefined ? videoUrl.trim() : existing.videoUrl,
           consent: consent !== undefined ? (consent === 'true' || consent === true) : existing.consent,
           status: status !== undefined ? status : existing.status,
+          coverImage: coverUrl,
           beforeImage: beforeUrl,
           afterImage: afterUrl
         }
@@ -174,6 +185,7 @@ router.delete('/:id', authenticateToken, async (req, res, next) => {
     const existing = await prisma.transformation.findUnique({ where: { id } });
     if (!existing) return res.status(404).json({ error: 'Transformation entry not found.' });
 
+    deleteLocalFile(existing.coverImage);
     deleteLocalFile(existing.beforeImage);
     deleteLocalFile(existing.afterImage);
 

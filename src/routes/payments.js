@@ -15,7 +15,7 @@ router.get('/invoice/:orderId', async (req, res, next) => {
     const admin = await prisma.admin.findFirst();
     return res.json({
       coachName: `${admin?.firstName || 'Sonu'} ${admin?.lastName || 'Ambre'}`,
-      coachEmail: admin?.email || 'sonuambre0@gmail.com',
+      coachEmail: admin?.email || 'sonu@apexcoaching.in',
       coachPhone: admin?.whatsapp || '+91 98765 43210',
       gstNumber: admin?.gstNumber || '',
       payment,

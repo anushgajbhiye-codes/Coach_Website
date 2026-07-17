@@ -64,8 +64,8 @@ Once started, access the pages at:
 
 ## 🔑 Coach Authentication Credentials
 Use the following credentials to log in to the Coach Admin panel at `admin.html`:
-- **Email**: `sonuambre0@gmail.com`
-- **Password**: `Sonu@2026`
+- **Email**: `sonu@apexcoaching.in`
+- **Password**: `Sonu@1234`
 
 ---
 

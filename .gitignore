@@ -4,3 +4,6 @@ node_modules/
 .chrome-debug/
 chrome-profile/
 uploads/
+Coach_Website/
+dev.db
+

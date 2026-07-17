@@ -7,20 +7,20 @@ async function main() {
 
   // 1. Admin seeding/updating (Consolidated single update path by primary key ID only)
   const existingAdmin = await prisma.admin.findFirst();
-  const passwordHash = await bcrypt.hash('Sonu@2026', 10);
+  const passwordHash = await bcrypt.hash('Sonu@1234', 10);
 
   if (existingAdmin) {
     console.log(`Found existing admin with ID: ${existingAdmin.id}. Updating names and email in place...`);
     await prisma.admin.update({
       where: { id: existingAdmin.id },
       data: {
-        email: 'sonuambre0@gmail.com',
+        email: 'sonu@apexcoaching.in',
         firstName: 'Sonu',
         lastName: 'Ambre',
         whatsapp: '+91 98765 43210',
         serviceArea: 'Personal Training available in Mumbai • Online Coaching Across India',
         seasonalBannerText: 'Wedding Season Special: Get ₹1,500 off on all coaching plans!',
-        aboutTextEn: 'Sonu Ambre is a certified trainer with over 8 years of coaching experience. His structured online methods have helped hundreds of clients achieve sustainable fat loss, clean muscle building, and peak physique transformations.',
+        aboutTextEn: 'Coach Sonu Ambre is an IFSA Certified Fitness Coach with over 4 years of experience in both online and offline coaching. He specializes in fat loss, muscle gain, body recomposition, and sustainable lifestyle transformations through personalized training and nutrition plans. Having successfully guided numerous clients toward achieving their fitness goals with proven results, Sonu is committed to helping individuals build strength, confidence, and long-term healthy habits through evidence-based coaching and continuous support.',
         aboutTextHi: 'सोनू आम्ब्रे एक प्रमाणित ट्रेनर हैं जिनके पास 8 साल से अधिक का कोचिंग अनुभव है। उनकी संरचित ऑनलाइन विधियों ने सैकड़ों ग्राहकों को निरंतर वसा हानि, मांसपेशियों के निर्माण और चरम शारीरिक परिवर्तन प्राप्त करने में मदद की है।'
       }
     });
@@ -28,7 +28,7 @@ async function main() {
     console.log('No admin record found. Creating a brand new Admin record...');
     await prisma.admin.create({
       data: {
-        email: 'sonuambre0@gmail.com',
+        email: 'sonu@apexcoaching.in',
         passwordHash,
         firstName: 'Sonu',
         lastName: 'Ambre',
@@ -55,7 +55,7 @@ async function main() {
         heroTitleHi: 'एपेक्स फिटनेस कोचिंग',
         heroSubtitleEn: 'Built from grit, refined by science.',
         heroSubtitleHi: 'साहस से निर्मित, विज्ञान द्वारा परिष्कृत।',
-        aboutTextEn: 'Sonu Ambre is a certified trainer with over 8 years of coaching experience. His structured online methods have helped hundreds of clients achieve sustainable fat loss, clean muscle building, and peak physique transformations.',
+        aboutTextEn: 'Coach Sonu Ambre is an IFSA Certified Fitness Coach with over 4 years of experience in both online and offline coaching. He specializes in fat loss, muscle gain, body recomposition, and sustainable lifestyle transformations through personalized training and nutrition plans. Having successfully guided numerous clients toward achieving their fitness goals with proven results, Sonu is committed to helping individuals build strength, confidence, and long-term healthy habits through evidence-based coaching and continuous support.',
         aboutTextHi: 'सोनू आम्ब्रे एक प्रमाणित ट्रेनर हैं जिनके पास 8 साल से अधिक का कोचिंग अनुभव है। उनकी संरचित ऑनलाइन विधियों ने सैकड़ों ग्राहकों को निरंतर वसा हानि, मांसपेशियों के निर्माण और चरम शारीरिक परिवर्तन प्राप्त करने में मदद की है।'
       }
     });
@@ -65,9 +65,9 @@ async function main() {
   const clientCount = await prisma.client.count();
   if (clientCount === 0) {
     const clientsData = [
-      { name: 'Rohan Patel', program: 'Fat Loss', plan: 'Elite', checkinDate: 'Jan 14', progress: 68, status: 'active', startDate: new Date('2023-12-15') },
+      { name: 'Rohan Patel', program: 'Fat Loss', plan: 'Pro', checkinDate: 'Jan 14', progress: 68, status: 'active', startDate: new Date('2023-12-15') },
       { name: 'Sana Nair', program: "Women's", plan: 'Pro', checkinDate: 'Jan 15', progress: 42, status: 'active', startDate: new Date('2023-12-15') },
-      { name: 'Arjun Kumar', program: 'Contest Prep', plan: 'Elite', checkinDate: 'Jan 13', progress: 85, status: 'active', startDate: new Date('2023-12-15') },
+      { name: 'Arjun Kumar', program: 'Contest Prep', plan: 'Pro', checkinDate: 'Jan 13', progress: 85, status: 'active', startDate: new Date('2023-12-15') },
       { name: 'Priya Desai', program: 'Muscle Build', plan: 'Pro', checkinDate: 'Jan 14', progress: 55, status: 'active', startDate: new Date('2023-12-15') },
       { name: 'Vikram Khanna', program: 'Body Recomp', plan: 'Basic', checkinDate: 'Jan 12', progress: 30, status: 'active', startDate: new Date('2023-12-15') },
       { name: 'Ananya Mehta', program: 'Fat Loss', plan: 'Pro', checkinDate: 'Jan 10', progress: 78, status: 'active', startDate: new Date('2023-12-15') },
@@ -165,7 +165,7 @@ async function main() {
     const resourcesData = [
       { name: 'Fat Loss Blueprint.pdf', type: 'eBook', access: 'Public', downloads: 312, isVegFriendly: true },
       { name: '12-Week Bulk Plan.pdf', type: 'Workout PDF', access: 'Pro+', downloads: 88, isVegFriendly: false },
-      { name: 'Elite Meal Plan Dec.pdf', type: 'Meal Plan PDF', access: 'Elite', downloads: 24, isVegFriendly: true },
+      { name: 'Pro Meal Plan Dec.pdf', type: 'Meal Plan PDF', access: 'Pro', downloads: 24, isVegFriendly: true },
       { name: 'Weekly Check-in Form', type: 'Check-in Form', access: 'All', downloads: 156, isVegFriendly: true },
     ];
     for (const r of resourcesData) {
@@ -198,15 +198,6 @@ async function main() {
         nameHindi: 'प्रो',
         featuresHindi: 'कस्टम वर्कआउट प्लान\nकस्टम मैक्रो लक्ष्य\nसप्ताह में दो बार चेक-इन\nऐप एक्सेस + लॉग्स\nसीधा व्हाट्सएप\nवीडियो फॉर्म समीक्षा',
       },
-      {
-        name: 'Elite',
-        price: 22999,
-        features: 'Custom workout plan\nPrecision custom macros\nUnlimited check-ins\nFull app access\nPriority WhatsApp\nForm video reviews\nSupplement guidance',
-        isActive: true,
-        isVegFriendly: true,
-        nameHindi: 'एलीट',
-        featuresHindi: 'कस्टम वर्कआउट प्लान\nसटीक कस्टम मैक्रोज़\nअसीमित चेक-इन\nपूर्ण ऐप एक्सेस\nप्राथमिकता व्हाट्सएप\nफॉर्म वीडियो समीक्षा\nपूरक मार्गदर्शन',
-      },
     ];
     for (const p of pricingPlansData) {
       await prisma.pricingPlan.create({ data: p });
@@ -231,6 +222,43 @@ async function main() {
     console.log(`Created ${certsData.length} certifications`);
   } else {
     console.log('Certifications table is not empty. Skipping certifications seeding.');
+  }
+
+  // 11. Testimonials seeding (skip if not empty)
+  const testimonialCount = await prisma.testimonial.count();
+  if (testimonialCount === 0) {
+    const testimonialsData = [
+      {
+        clientName: 'Rohan Patel',
+        initials: 'RP',
+        rating: 5,
+        quote: '"I tried 3 coaches before Sonu. In 12 weeks with him, I lost more than I had in the previous 2 years combined. The difference is the science — everything is explained, nothing is guesswork."',
+        resultTag: '−22kg · Fat Loss Program',
+        displayOrder: 1
+      },
+      {
+        clientName: 'Sana Nair',
+        initials: 'SN',
+        rating: 5,
+        quote: '"As a complete beginner, I was terrified of the gym. Sonu built my confidence rep by rep. 6 months in and I\'m doing exercises I never thought were possible for someone like me."',
+        resultTag: 'Beginner · Women\'s Coaching',
+        displayOrder: 2
+      },
+      {
+        clientName: 'Arjun Kumar',
+        initials: 'AK',
+        rating: 5,
+        quote: '"Contest prep is brutal. Sonu made it the best experience of my competitive career. Clear peaking protocol, constant adjustments, and the check-ins kept me dialed in every single week."',
+        resultTag: 'NPC Men\'s Physique · Top 3',
+        displayOrder: 3
+      }
+    ];
+    for (const testimonial of testimonialsData) {
+      await prisma.testimonial.create({ data: testimonial });
+    }
+    console.log(`Created ${testimonialsData.length} testimonials`);
+  } else {
+    console.log('Testimonials table is not empty. Skipping testimonials seeding.');
   }
 
   console.log('Seeding finished successfully (Non-destructive).');

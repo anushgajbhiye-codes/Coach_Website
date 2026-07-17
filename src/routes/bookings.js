@@ -37,6 +37,7 @@ router.post('/', async (req, res, next) => {
         phone: phone.trim(),
         dateTime: bookingDate,
         programInterest: programInterest.trim(),
+        goal: goal ? goal.trim() : null,
         status: 'pending'
       }
     });
@@ -53,6 +54,7 @@ router.get('/', authenticateToken, async (req, res, next) => {
     const bookings = await prisma.booking.findMany({
       orderBy: { dateTime: 'asc' }
     });
+    console.log('BOOKINGS ROUTE HIT, found:', bookings.length);
     return res.json(bookings);
   } catch (error) {
     next(error);

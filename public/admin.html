@@ -409,9 +409,9 @@ body{background:var(--black);color:var(--white);font-family:'Inter',sans-serif;l
     <span class="login-logo">APEX</span>
     <p class="login-subtitle">Admin Panel — Coach Access</p>
     <label class="login-label" for="loginEmail">Email Address</label>
-    <input class="login-input" id="loginEmail" type="email" placeholder="Email" autocomplete="username">
+    <input class="login-input" id="loginEmail" type="email" placeholder="coach@apexcoaching.in" autocomplete="username">
     <label class="login-label" for="loginPass">Password</label>
-    <input class="login-input" id="loginPass" type="password" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    <input class="login-input" id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
     <div class="login-error" id="loginError">Incorrect email or password. Please try again.</div>
     <button class="login-btn" onclick="doLogin()"><span>Access Dashboard →</span></button>
   </div>
@@ -458,6 +458,9 @@ body{background:var(--black);color:var(--white);font-family:'Inter',sans-serif;l
       </a>
       <a class="nav-item" onclick="goPage('certifications',this)">
         <span class="nav-icon">📜</span><span class="nav-label">Certifications</span>
+      </a>
+      <a class="nav-item" onclick="goPage('testimonials',this)">
+        <span class="nav-icon">💬</span><span class="nav-label">Testimonials</span>
       </a>
       <div class="nav-section-label">Business</div>
       <a class="nav-item" onclick="goPage('pricing',this)">
@@ -582,13 +585,9 @@ body{background:var(--black);color:var(--white);font-family:'Inter',sans-serif;l
           <div class="panel-head"><span class="panel-title">Upcoming Consultations</span></div>
           <div style="overflow-x:auto;">
             <table class="data-table">
-              <thead><tr><th>Name</th><th>Date & Time</th><th>Program Interest</th><th>Status</th><th>Actions</th></tr></thead>
+              <thead><tr><th>Client Info</th><th>Date & Time</th><th>Program Interest</th><th>Current Goal</th><th>Status</th><th>Actions</th></tr></thead>
               <tbody>
-                <tr><td><span class="tbl-avatar">RP</span>Rohan Patel</td><td>Jan 15, 10:00 AM</td><td>Fat Loss</td><td><span class="badge badge-pending">Pending</span></td><td><button class="action-btn gold" onclick="showToast('Booking approved ✓')">Approve</button><button class="action-btn" onclick="showToast('Booking declined')">Decline</button></td></tr>
-                <tr><td><span class="tbl-avatar">SN</span>Sana Nair</td><td>Jan 15, 11:30 AM</td><td>Women's Coaching</td><td><span class="badge badge-pending">Pending</span></td><td><button class="action-btn gold" onclick="showToast('Booking approved ✓')">Approve</button><button class="action-btn" onclick="showToast('Booking declined')">Decline</button></td></tr>
-                <tr><td><span class="tbl-avatar">AK</span>Arjun Kumar</td><td>Jan 16, 2:00 PM</td><td>Contest Prep</td><td><span class="badge badge-active">Confirmed</span></td><td><button class="action-btn" onclick="showToast('Reminder sent')">Send Reminder</button></td></tr>
-                <tr><td><span class="tbl-avatar">PD</span>Priya Desai</td><td>Jan 17, 9:00 AM</td><td>Muscle Building</td><td><span class="badge badge-active">Confirmed</span></td><td><button class="action-btn" onclick="showToast('Reminder sent')">Send Reminder</button></td></tr>
-                <tr><td><span class="tbl-avatar">VK</span>Vikram Khanna</td><td>Jan 18, 4:00 PM</td><td>Body Recomp</td><td><span class="badge badge-pending">Pending</span></td><td><button class="action-btn gold" onclick="showToast('Booking approved ✓')">Approve</button><button class="action-btn" onclick="showToast('Booking declined')">Decline</button></td></tr>
+                <!-- Loaded dynamically via JS -->
               </tbody>
             </table>
           </div>
@@ -693,6 +692,16 @@ body{background:var(--black);color:var(--white);font-family:'Inter',sans-serif;l
                   <select class="form-select" id="transProgramType">
                     <option>Fat Loss</option><option>Muscle Building</option><option>Contest Prep</option><option>Recomp</option>
                   </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Cover Photo (Large Main Image)</label>
+                  <div class="upload-zone" style="padding:24px;" onclick="document.getElementById('transCoverFile').click()">
+                    <input type="file" id="transCoverFile" style="display:none;" onchange="updateUploadLabel('transCoverLabel', this)">
+                    <span class="upload-icon">📷</span>
+                    <div class="upload-label" id="transCoverLabel">Cover Photo</div>
+                  </div>
                 </div>
               </div>
               <div class="form-row">
@@ -852,6 +861,63 @@ body{background:var(--black);color:var(--white);font-family:'Inter',sans-serif;l
         </div>
       </div>
 
+      <!-- ── TESTIMONIALS ── -->
+      <div class="page" id="page-testimonials">
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel-head"><span class="panel-title" id="testimonialFormTitle">Add Testimonial</span></div>
+            <div class="panel-body">
+              <input type="hidden" id="testiId" value="">
+              <div class="form-group">
+                <label class="form-label">Client Name</label>
+                <input class="form-input" id="testiName" placeholder="e.g. Rohan Patel">
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Initials</label>
+                  <input class="form-input" id="testiInitials" placeholder="e.g. RP (optional)">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Star Rating</label>
+                  <select class="form-input" id="testiRating">
+                    <option value="5">5 Stars</option>
+                    <option value="4">4 Stars</option>
+                    <option value="3">3 Stars</option>
+                    <option value="2">2 Stars</option>
+                    <option value="1">1 Star</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Result Tag</label>
+                <input class="form-input" id="testiTag" placeholder="e.g. −22kg · Fat Loss Program">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Display Order</label>
+                <input type="number" class="form-input" id="testiOrder" value="0" placeholder="e.g. 1">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Quote Text</label>
+                <textarea class="form-input" id="testiQuote" rows="4" placeholder="Type the testimonial quote here..." style="resize:vertical;"></textarea>
+              </div>
+              <button class="btn-gold" id="btnSubmitTesti" onclick="submitTestimonial()">Add Testimonial</button>
+              <button class="btn-gold" id="btnCancelTesti" onclick="cancelTestiEdit()" style="display:none;margin-top:10px;background:#333;color:#fff;">Cancel Edit</button>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><span class="panel-title">Active Testimonials</span></div>
+            <div style="overflow-x:auto;">
+              <table class="data-table">
+                <thead><tr><th>Name</th><th>Rating</th><th>Tag</th><th>Order</th><th></th></tr></thead>
+                <tbody id="testimonialsTableBody">
+                  <!-- Loaded dynamically via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- ── SETTINGS ── -->
       <div class="page" id="page-settings">
         <div class="grid-2">
@@ -862,20 +928,20 @@ body{background:var(--black);color:var(--white);font-family:'Inter',sans-serif;l
                 <div class="form-row">
                   <div class="form-group">
                     <label class="form-label">First Name</label>
-                    <input class="form-input" id="settingsFirstName" value="">
+                    <input class="form-input" id="settingsFirstName" value="Sonu">
                   </div>
                   <div class="form-group">
                     <label class="form-label">Last Name</label>
-                    <input class="form-input" id="settingsLastName" value="">
+                    <input class="form-input" id="settingsLastName" value="Ambre">
                   </div>
                 </div>
                 <div class="form-group">
                   <label class="form-label">Email</label>
-                  <input class="form-input" id="settingsEmail" value="">
+                  <input class="form-input" id="settingsEmail" value="sonu@apexcoaching.in">
                 </div>
                 <div class="form-group">
                   <label class="form-label">WhatsApp Number</label>
-                  <input class="form-input" id="settingsWhatsapp" value="">
+                  <input class="form-input" id="settingsWhatsapp" value="+91 98765 43210">
                 </div>
                 <button class="btn-gold" onclick="saveProfileSettings()">Save Profile</button>
               </div>
@@ -1112,8 +1178,9 @@ body{background:var(--black);color:var(--white);font-family:'Inter',sans-serif;l
       </div>
 
     </div><!-- /content -->
-    <footer style="padding:16px 32px;border-top:1px solid rgba(255,255,255,0.05);background:rgba(10,10,10,0.5);display:flex;justify-content:center;align-items:center;flex-shrink:0;">
+    <footer style="padding:16px 32px;border-top:1px solid rgba(255,255,255,0.05);background:rgba(10,10,10,0.5);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px;flex-shrink:0;">
       <span style="font-size:11px;color:var(--gray3);letter-spacing:1px;font-family:'Inter',sans-serif;">Developed by Anush Gajbhiye</span>
+      <a href="mailto:anushgajbhiye50@gmail.com" style="font-size:10px;color:var(--gray3);text-decoration:none;transition:color 0.2s;font-family:'Inter',sans-serif;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--gray3)'">anushgajbhiye50@gmail.com</a>
     </footer>
   </div><!-- /main -->
 </div><!-- /app -->
@@ -1231,6 +1298,7 @@ async function initDashboard() {
       loadResources(),
       loadPricingPlans(),
       loadCertifications(),
+      loadTestimonials(),
       loadSettings()
     ]);
   } catch (error) {
@@ -1261,7 +1329,7 @@ const pageTitles = {
   dashboard: 'Dashboard', clients: 'Clients', inquiries: 'Inquiries', bookings: 'Bookings',
   users: 'Website Users',
   blog: 'Blog Posts', transformations: 'Transformations', videos: 'Videos',
-  resources: 'Resources & PDFs', certifications: 'Certifications', pricing: 'Pricing', settings: 'Settings'
+  resources: 'Resources & PDFs', certifications: 'Certifications', testimonials: 'Testimonials', pricing: 'Pricing', settings: 'Settings'
 };
 
 function goPage(id, el) {
@@ -1592,9 +1660,18 @@ async function loadBookings() {
       const escapedStatus = escapeHTML(b.status);
       return `
       <tr>
-        <td><span class="tbl-avatar">${escapeHTML(getInitials(b.name))}</span>${escapedName}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="tbl-avatar">${escapeHTML(getInitials(b.name))}</span>
+            <div>
+              <div style="font-weight:500;">${escapedName}</div>
+              <div style="font-size:11px;color:rgba(255,255,255,0.5);">${escapeHTML(b.email)} &bull; ${escapeHTML(b.phone)}</div>
+            </div>
+          </div>
+        </td>
         <td>${new Date(b.dateTime).toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</td>
-        <td>${escapedProgram}</td>
+        <td><span class="badge" style="background:rgba(45,212,191,0.1);color:var(--teal);">${escapedProgram}</span></td>
+        <td style="max-width:200px;white-space:normal;font-size:12px;color:rgba(255,255,255,0.7);">${escapeHTML(b.goal || 'No goal specified')}</td>
         <td><span class="badge badge-${escapedStatus === 'confirmed' ? 'active' : escapedStatus === 'declined' ? 'inactive' : 'pending'}">${escapedStatus}</span></td>
         <td>
           ${escapedStatus === 'pending' ? `
@@ -1810,6 +1887,9 @@ async function editTransformation(id) {
     }
 
     // Update labels to show photos exist
+    document.getElementById('transCoverLabel').textContent = t.coverImage ? 'Change Cover Photo (exists)' : 'Cover Photo';
+    if (t.coverImage) document.getElementById('transCoverLabel').style.color = 'var(--gold)';
+
     document.getElementById('transBeforeLabel').textContent = t.beforeImage ? 'Change Before Photo (exists)' : 'Before';
     if (t.beforeImage) document.getElementById('transBeforeLabel').style.color = 'var(--gold)';
     
@@ -1850,6 +1930,7 @@ async function submitTransformation() {
   const programType = document.getElementById('transProgramType').value;
   const testimonial = document.getElementById('transTestimonial').value.trim();
   const videoUrl = document.getElementById('transVideoUrl').value.trim();
+  const coverFile = document.getElementById('transCoverFile').files[0];
   const beforeFile = document.getElementById('transBeforeFile').files[0];
   const afterFile = document.getElementById('transAfterFile').files[0];
 
@@ -1867,6 +1948,7 @@ async function submitTransformation() {
   formData.append('videoUrl', videoUrl);
   formData.append('consent', consentValue);
   formData.append('status', 'live');
+  if (coverFile) formData.append('coverImage', coverFile);
   if (beforeFile) formData.append('beforeImage', beforeFile);
   if (afterFile) formData.append('afterImage', afterFile);
 
@@ -1893,8 +1975,11 @@ function clearTransformationForm() {
   document.getElementById('transResult').value = '';
   document.getElementById('transTestimonial').value = '';
   document.getElementById('transVideoUrl').value = '';
+  document.getElementById('transCoverFile').value = '';
   document.getElementById('transBeforeFile').value = '';
   document.getElementById('transAfterFile').value = '';
+  document.getElementById('transCoverLabel').textContent = 'Cover Photo';
+  document.getElementById('transCoverLabel').style.color = '';
   document.getElementById('transBeforeLabel').textContent = 'Before';
   document.getElementById('transBeforeLabel').style.color = '';
   document.getElementById('transAfterLabel').textContent = 'After';
@@ -2061,6 +2146,114 @@ async function deleteCertification(id) {
     await apiFetch(`/api/certifications/${id}`, { method: 'DELETE' });
     showToast('Certification deleted.');
     await loadCertifications();
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+// ── TESTIMONIALS ──
+let loadedTestimonials = [];
+
+async function loadTestimonials() {
+  const tbody = document.getElementById('testimonialsTableBody');
+  if (!tbody) return;
+  
+  try {
+    loadedTestimonials = await apiFetch('/api/testimonials');
+    tbody.innerHTML = loadedTestimonials.map(t => {
+      return `
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div style="width:30px;height:30px;border-radius:50%;background:rgba(201,168,76,0.15);color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;border:1px solid rgba(201,168,76,0.3);">
+                ${escapeHTML(t.initials || '??')}
+              </div>
+              <span style="font-weight:500;">${escapeHTML(t.clientName)}</span>
+            </div>
+          </td>
+          <td><span style="color:var(--gold);">${'★'.repeat(t.rating)}</span></td>
+          <td><span class="badge" style="background:rgba(45,212,191,0.1);color:var(--teal);font-size:11px;padding:2px 6px;border-radius:3px;">${escapeHTML(t.resultTag)}</span></td>
+          <td>${t.displayOrder}</td>
+          <td class="table-actions">
+            <button class="action-btn edit-btn" onclick="editTestimonial('${t.id}')" title="Edit">✏️</button>
+            <button class="action-btn delete-btn" onclick="deleteTestimonial('${t.id}')" title="Delete">🗑️</button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+async function submitTestimonial() {
+  const id = document.getElementById('testiId').value;
+  const clientName = document.getElementById('testiName').value.trim();
+  const initials = document.getElementById('testiInitials').value.trim();
+  const rating = parseInt(document.getElementById('testiRating').value);
+  const resultTag = document.getElementById('testiTag').value.trim();
+  const displayOrder = parseInt(document.getElementById('testiOrder').value || 0);
+  const quote = document.getElementById('testiQuote').value.trim();
+
+  if (!clientName || !resultTag || !quote) {
+    showToast('Please fill out Client Name, Result Tag, and Quote text.');
+    return;
+  }
+
+  const payload = { clientName, initials, rating, resultTag, displayOrder, quote };
+  const url = id ? `/api/testimonials/${id}` : '/api/testimonials';
+  const method = id ? 'PUT' : 'POST';
+
+  try {
+    await apiFetch(url, {
+      method,
+      body: JSON.stringify(payload)
+    });
+    showToast(id ? 'Testimonial updated!' : 'Testimonial added!');
+    cancelTestiEdit();
+    await loadTestimonials();
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+function editTestimonial(id) {
+  const t = loadedTestimonials.find(x => x.id === id);
+  if (!t) return;
+
+  document.getElementById('testiId').value = t.id;
+  document.getElementById('testiName').value = t.clientName;
+  document.getElementById('testiInitials').value = t.initials || '';
+  document.getElementById('testiRating').value = t.rating;
+  document.getElementById('testiTag').value = t.resultTag;
+  document.getElementById('testiOrder').value = t.displayOrder;
+  document.getElementById('testiQuote').value = t.quote;
+
+  document.getElementById('testimonialFormTitle').textContent = 'Edit Testimonial';
+  document.getElementById('btnSubmitTesti').textContent = 'Save Testimonial';
+  document.getElementById('btnCancelTesti').style.display = 'block';
+}
+
+function cancelTestiEdit() {
+  document.getElementById('testiId').value = '';
+  document.getElementById('testiName').value = '';
+  document.getElementById('testiInitials').value = '';
+  document.getElementById('testiRating').value = '5';
+  document.getElementById('testiTag').value = '';
+  document.getElementById('testiOrder').value = '0';
+  document.getElementById('testiQuote').value = '';
+
+  document.getElementById('testimonialFormTitle').textContent = 'Add Testimonial';
+  document.getElementById('btnSubmitTesti').textContent = 'Add Testimonial';
+  document.getElementById('btnCancelTesti').style.display = 'none';
+}
+
+async function deleteTestimonial(id) {
+  if (!confirm('Are you sure you want to delete this testimonial?')) return;
+  try {
+    await apiFetch(`/api/testimonials/${id}`, { method: 'DELETE' });
+    showToast('Testimonial deleted.');
+    await loadTestimonials();
   } catch (error) {
     showToast(error.message);
   }

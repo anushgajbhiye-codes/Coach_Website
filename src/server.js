@@ -3,41 +3,12 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const cookieParser = require('cookie-parser');
-const helmet = require('helmet');
 const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-
-// Apply Helmet early in the middleware chain
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "https://res.cloudinary.com"],
-      scriptSrc: ["'self'", "'unsafe-inline'"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-      fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      connectSrc: ["'self'"],
-      frameSrc: ["'self'", "https://www.youtube.com", "https://*.youtube.com"],
-      childSrc: ["'self'", "https://www.youtube.com", "https://*.youtube.com"],
-      objectSrc: ["'none'"]
-    }
-  },
-  hsts: {
-    maxAge: 31536000,
-    includeSubDomains: true,
-    preload: true
-  }
-}));
-
-// Set Permissions-Policy header
-app.use((req, res, next) => {
-  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-  next();
-});
 
 // Enable CORS with credentials support
 app.use(cors({ origin: true, credentials: true }));
@@ -100,6 +71,7 @@ const paymentsRouter = require('./routes/payments');
 const certificationsRouter = require('./routes/certifications');
 const legalRouter = require('./routes/legal');
 const usersRouter = require('./routes/users');
+const testimonialsRouter = require('./routes/testimonials');
 
 // Mount API routes
 app.use('/api/auth', authRouter);
@@ -115,47 +87,7 @@ app.use('/api/payments', paymentsRouter);
 app.use('/api/certifications', certificationsRouter);
 app.use('/api/legal', legalRouter);
 app.use('/api/users', usersRouter);
-
-// Temporary protected emergency admin reset route
-app.post('/api/emergency-admin-reset', async (req, res, next) => {
-  try {
-    const key = req.query.key || req.headers['x-emergency-key'];
-    const emergencyKey = process.env.EMERGENCY_RESET_KEY;
-
-    if (!emergencyKey || !key || key !== emergencyKey) {
-      return res.status(401).json({ error: 'Unauthorized: Invalid or missing emergency reset key.' });
-    }
-
-    const admins = await prisma.admin.findMany();
-    console.log(`[EMERGENCY_RESET] Current number of admins: ${admins.length}`);
-
-    if (admins.length === 0) {
-      return res.status(404).json({ error: 'No admin record found to reset.' });
-    }
-
-    const bcrypt = require('bcryptjs');
-    const targetAdmin = admins[0];
-    const passwordHash = await bcrypt.hash('Sonu@2026', 10);
-
-    const updated = await prisma.admin.update({
-      where: { id: targetAdmin.id },
-      data: {
-        email: 'sonuambre0@gmail.com',
-        passwordHash: passwordHash
-      }
-    });
-
-    console.log(`[EMERGENCY_RESET] Successfully updated Admin ID: ${updated.id} to sonuambre0@gmail.com`);
-    
-    return res.json({
-      message: 'Emergency admin credentials reset successfully completed.',
-      adminId: updated.id,
-      email: updated.email
-    });
-  } catch (error) {
-    next(error);
-  }
-});
+app.use('/api/testimonials', testimonialsRouter);
 
 // Public dynamic configuration settings endpoint
 app.get('/api/settings', async (req, res, next) => {
