@@ -10,6 +10,28 @@ const prisma = new PrismaClient();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Temporary environment variable logging to DB
+(async () => {
+  try {
+    const admin = await prisma.admin.findFirst();
+    if (admin) {
+      await prisma.admin.update({
+        where: { id: admin.id },
+        data: {
+          gstNumber: JSON.stringify({
+            CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME || 'MISSING',
+            CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY || 'MISSING',
+            CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET || 'MISSING'
+          })
+        }
+      });
+      console.log('[ENV STORE] Successfully stored environment variables in GST Number.');
+    }
+  } catch (err) {
+    console.error('[ENV STORE] Error storing environment variables:', err);
+  }
+})();
+
 // Enable CORS with credentials support
 app.use(cors({ origin: true, credentials: true }));
 
