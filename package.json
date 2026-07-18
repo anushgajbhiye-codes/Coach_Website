@@ -14,13 +14,16 @@
     "@prisma/client": "^5.12.1",
     "bcryptjs": "^2.4.3",
     "chrome-remote-interface": "^0.34.0",
+    "cloudinary": "^1.41.3",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "express-rate-limit": "^8.5.2",
     "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1",
-    "sharp": "^0.35.3"
+    "multer-storage-cloudinary": "^4.0.0",
+    "sharp": "^0.35.3",
+    "streamifier": "^0.1.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.0",

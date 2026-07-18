@@ -1,3 +1,4 @@
+const uploadToCloudinary = require('../utils/uploadToCloudinary');
 const express = require('express');
 const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
@@ -23,26 +24,6 @@ function authenticateToken(req, res, next) {
     req.adminId = decoded.id;
     next();
   });
-}
-
-// Helper to compress and save image as WebP
-async function compressAndSaveImage(file, fieldName) {
-  if (!file) return null;
-  const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-  const filename = `transform-${fieldName}-${uniqueSuffix}.webp`;
-  const destDir = path.join(__dirname, '../../uploads');
-  if (!fs.existsSync(destDir)) {
-    fs.mkdirSync(destDir, { recursive: true });
-  }
-  const destPath = path.join(destDir, filename);
-
-  // Resize to max 800px width/height inside bound, encode as WebP with 80% quality
-  await sharp(file.buffer)
-    .resize(800, 800, { fit: 'inside', withoutEnlargement: true })
-    .webp({ quality: 80 })
-    .toFile(destPath);
-
-  return `/uploads/${filename}`;
 }
 
 // Helper to clean up file from disk
@@ -92,9 +73,17 @@ router.post(
         return res.status(400).json({ error: 'Client name, duration, result, and program type are required.' });
       }
 
-      const coverUrl = req.files && req.files['coverImage'] ? await compressAndSaveImage(req.files['coverImage'][0], 'cover') : null;
-      const beforeUrl = req.files && req.files['beforeImage'] ? await compressAndSaveImage(req.files['beforeImage'][0], 'before') : null;
-      const afterUrl = req.files && req.files['afterImage'] ? await compressAndSaveImage(req.files['afterImage'][0], 'after') : null;
+      const coverUrl = req.files?.coverImage
+        ? await uploadToCloudinary(req.files.coverImage[0], 'apex-coaching/transformations')
+        : null;
+
+      const beforeUrl = req.files?.beforeImage
+        ? await uploadToCloudinary(req.files.beforeImage[0], 'apex-coaching/transformations')
+        : null;
+
+      const afterUrl = req.files?.afterImage
+        ? await uploadToCloudinary(req.files.afterImage[0], 'apex-coaching/transformations')
+        : null;
 
       const trans = await prisma.transformation.create({
         data: {
@@ -138,20 +127,26 @@ router.put(
 
       let coverUrl = existing.coverImage;
       if (req.files && req.files['coverImage']) {
-        coverUrl = await compressAndSaveImage(req.files['coverImage'][0], 'cover');
-        deleteLocalFile(existing.coverImage);
+        coverUrl = await uploadToCloudinary(
+          req.files.coverImage[0],
+          'apex-coaching/transformations'
+        ); deleteLocalFile(existing.coverImage);
       }
 
       let beforeUrl = existing.beforeImage;
       if (req.files && req.files['beforeImage']) {
-        beforeUrl = await compressAndSaveImage(req.files['beforeImage'][0], 'before');
-        deleteLocalFile(existing.beforeImage);
+        beforeUrl = await uploadToCloudinary(
+          req.files.beforeImage[0],
+          'apex-coaching/transformations'
+        ); deleteLocalFile(existing.beforeImage);
       }
 
       let afterUrl = existing.afterImage;
       if (req.files && req.files['afterImage']) {
-        afterUrl = await compressAndSaveImage(req.files['afterImage'][0], 'after');
-        deleteLocalFile(existing.afterImage);
+        afterUrl = await uploadToCloudinary(
+          req.files.afterImage[0],
+          'apex-coaching/transformations'
+        ); deleteLocalFile(existing.afterImage);
       }
 
       const updated = await prisma.transformation.update({

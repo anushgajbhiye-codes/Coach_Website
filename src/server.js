@@ -10,32 +10,6 @@ const prisma = new PrismaClient();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Temporary environment variable logging to DB
-(async () => {
-  try {
-    const admin = await prisma.admin.findFirst();
-    if (admin) {
-      const keys = Object.keys(process.env).filter(k => !k.includes('PASSWORD') && !k.includes('SECRET') && !k.includes('KEY'));
-      await prisma.admin.update({
-        where: { id: admin.id },
-        data: {
-          gstNumber: JSON.stringify({
-            keys,
-            CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME || 'MISSING',
-            CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY || 'MISSING',
-            CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET ? 'PRESENT' : 'MISSING',
-            // Check if there are keys containing CLOUD or CLOUDINARY
-            matchingKeys: Object.keys(process.env).filter(k => k.toLowerCase().includes('cloud'))
-          })
-        }
-      });
-      console.log('[ENV STORE] Successfully stored environment variables in GST Number.');
-    }
-  } catch (err) {
-    console.error('[ENV STORE] Error storing environment variables:', err);
-  }
-})();
-
 // Enable CORS with credentials support
 app.use(cors({ origin: true, credentials: true }));
 
@@ -65,7 +39,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'apex_super_secure_secret_2026';
 
 function authenticateToken(req, res, next) {
   const token = req.cookies?.apex_token || (req.headers['authorization'] && req.headers['authorization'].split(' ')[1]);
-  
+
   if (!token) {
     return res.status(401).json({ error: 'Access token required.' });
   }
@@ -120,7 +94,7 @@ app.get('/api/settings', async (req, res, next) => {
   try {
     const admin = await prisma.admin.findFirst();
     if (!admin) return res.json({});
-    
+
     return res.json({
       firstName: admin.firstName,
       lastName: admin.lastName,
@@ -180,6 +154,7 @@ app.use((err, req, res, next) => {
   console.error('Express global error handler:', err);
   res.status(500).json({ error: err.message || 'Something went wrong on the server.' });
 });
+
 
 app.listen(PORT, () => {
   console.log(`APEX Coaching Backend listening on port ${PORT}...`);

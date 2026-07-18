@@ -1,12 +1,11 @@
+const path = require('path');
+const fs = require('fs');
 const express = require('express');
 const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
-const sharp = require('sharp');
-
+const uploadToCloudinary = require('../utils/uploadToCloudinary');
 const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'apex_super_secure_secret_2026';
 
@@ -25,25 +24,7 @@ function authenticateToken(req, res, next) {
   });
 }
 
-// Helper to compress and save image as WebP
-async function compressAndSaveImage(file) {
-  if (!file) return null;
-  const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-  const filename = `blog-${uniqueSuffix}.webp`;
-  const destDir = path.join(__dirname, '../../uploads');
-  if (!fs.existsSync(destDir)) {
-    fs.mkdirSync(destDir, { recursive: true });
-  }
-  const destPath = path.join(destDir, filename);
 
-  // Resize to max 800px width/height inside bound, encode as WebP with 80% quality
-  await sharp(file.buffer)
-    .resize(800, 800, { fit: 'inside', withoutEnlargement: true })
-    .webp({ quality: 80 })
-    .toFile(destPath);
-
-  return `/uploads/${filename}`;
-}
 
 // Helper to clean up file from disk
 function deleteLocalFile(fileUrl) {
@@ -84,8 +65,13 @@ router.post('/', authenticateToken, upload.single('coverImage'), async (req, res
       return res.status(400).json({ error: 'Title, category, and content are required.' });
     }
 
-    const coverImageUrl = req.file ? await compressAndSaveImage(req.file) : null;
+    let coverImageUrl = null;
 
+    if (req.file) {
+      console.log("Uploading image to Cloudinary...");
+      coverImageUrl = await uploadToCloudinary(req.file, "apex-coaching/blog");
+      console.log("Cloudinary URL:", coverImageUrl);
+    }
     const post = await prisma.blogPost.create({
       data: {
         title: title.trim(),
@@ -113,7 +99,7 @@ router.put('/:id', authenticateToken, upload.single('coverImage'), async (req, r
 
     let coverImageUrl = existing.coverImage;
     if (req.file) {
-      coverImageUrl = await compressAndSaveImage(req.file);
+      coverImageUrl = await uploadToCloudinary(req.file, 'apex-coaching/blog');
       deleteLocalFile(existing.coverImage);
     }
 

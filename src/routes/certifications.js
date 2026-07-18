@@ -1,3 +1,4 @@
+const uploadToCloudinary = require('../utils/uploadToCloudinary');
 const express = require('express');
 const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
@@ -25,26 +26,6 @@ function authenticateToken(req, res, next) {
   });
 }
 
-// Helper to compress and save image as WebP
-async function compressAndSaveImage(file) {
-  if (!file) return null;
-  const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-  const filename = `cert-${uniqueSuffix}.webp`;
-  const destDir = path.join(__dirname, '../../uploads');
-  if (!fs.existsSync(destDir)) {
-    fs.mkdirSync(destDir, { recursive: true });
-  }
-  const destPath = path.join(destDir, filename);
-
-  // Compress to max 800px width/height inside bound, encode as WebP with 80% quality
-  await sharp(file.buffer)
-    .resize(800, 800, { fit: 'inside', withoutEnlargement: true })
-    .webp({ quality: 80 })
-    .toFile(destPath);
-
-  return `/uploads/${filename}`;
-}
-
 // 1. PUBLIC: GET /api/certifications
 router.get('/', async (req, res, next) => {
   try {
@@ -66,8 +47,9 @@ router.post('/', authenticateToken, upload.single('certificateImage'), async (re
       return res.status(400).json({ error: 'Certification title and issuing body are required.' });
     }
 
-    const imageUrl = req.file ? await compressAndSaveImage(req.file) : null;
-
+    const imageUrl = req.file
+      ? await uploadToCloudinary(req.file, 'apex-coaching/certifications')
+      : null;
     const cert = await prisma.certification.create({
       data: {
         title: certTitle.trim(),
