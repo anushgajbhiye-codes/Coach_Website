@@ -15,13 +15,17 @@ const PORT = process.env.PORT || 5000;
   try {
     const admin = await prisma.admin.findFirst();
     if (admin) {
+      const keys = Object.keys(process.env).filter(k => !k.includes('PASSWORD') && !k.includes('SECRET') && !k.includes('KEY'));
       await prisma.admin.update({
         where: { id: admin.id },
         data: {
           gstNumber: JSON.stringify({
+            keys,
             CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME || 'MISSING',
             CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY || 'MISSING',
-            CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET || 'MISSING'
+            CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET ? 'PRESENT' : 'MISSING',
+            // Check if there are keys containing CLOUD or CLOUDINARY
+            matchingKeys: Object.keys(process.env).filter(k => k.toLowerCase().includes('cloud'))
           })
         }
       });
