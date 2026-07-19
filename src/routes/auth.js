@@ -161,12 +161,12 @@ router.put('/settings', authenticateToken, async (req, res, next) => {
       privacyPolicy, termsOfService, refundPolicy,
       serviceArea,
       seasonalBannerActive, seasonalBannerText, seasonalBannerDiscount,
-      heroTitleEn, heroTitleHi, heroSubtitleEn, heroSubtitleHi,
-      aboutTextEn, aboutTextHi,
-      prog1NameEn, prog1NameHi, prog1DescEn, prog1DescHi, prog1PriceEn, prog1PriceHi,
-      prog2NameEn, prog2NameHi, prog2DescEn, prog2DescHi, prog2PriceEn, prog2PriceHi,
-      prog3NameEn, prog3NameHi, prog3DescEn, prog3DescHi, prog3PriceEn, prog3PriceHi,
-      prog4NameEn, prog4NameHi, prog4DescEn, prog4DescHi, prog4PriceEn, prog4PriceHi
+      heroTitleEn, heroSubtitleEn,
+      aboutTextEn,
+      prog1NameEn, prog1DescEn, prog1PriceEn,
+      prog2NameEn, prog2DescEn, prog2PriceEn,
+      prog3NameEn, prog3DescEn, prog3PriceEn,
+      prog4NameEn, prog4DescEn, prog4PriceEn
     } = req.body;
 
     const updatedAdmin = await prisma.admin.update({
@@ -181,35 +181,20 @@ router.put('/settings', authenticateToken, async (req, res, next) => {
         seasonalBannerText: seasonalBannerText !== undefined ? seasonalBannerText.trim() : undefined,
         seasonalBannerDiscount: seasonalBannerDiscount !== undefined ? parseInt(seasonalBannerDiscount) : undefined,
         heroTitleEn: heroTitleEn !== undefined ? heroTitleEn.trim() : undefined,
-        heroTitleHi: heroTitleHi !== undefined ? heroTitleHi.trim() : undefined,
         heroSubtitleEn: heroSubtitleEn !== undefined ? heroSubtitleEn.trim() : undefined,
-        heroSubtitleHi: heroSubtitleHi !== undefined ? heroSubtitleHi.trim() : undefined,
         aboutTextEn: aboutTextEn !== undefined ? aboutTextEn.trim() : undefined,
-        aboutTextHi: aboutTextHi !== undefined ? aboutTextHi.trim() : undefined,
         prog1NameEn: prog1NameEn !== undefined ? prog1NameEn.trim() : undefined,
-        prog1NameHi: prog1NameHi !== undefined ? prog1NameHi.trim() : undefined,
         prog1DescEn: prog1DescEn !== undefined ? prog1DescEn.trim() : undefined,
-        prog1DescHi: prog1DescHi !== undefined ? prog1DescHi.trim() : undefined,
         prog1PriceEn: prog1PriceEn !== undefined ? prog1PriceEn.trim() : undefined,
-        prog1PriceHi: prog1PriceHi !== undefined ? prog1PriceHi.trim() : undefined,
         prog2NameEn: prog2NameEn !== undefined ? prog2NameEn.trim() : undefined,
-        prog2NameHi: prog2NameHi !== undefined ? prog2NameHi.trim() : undefined,
         prog2DescEn: prog2DescEn !== undefined ? prog2DescEn.trim() : undefined,
-        prog2DescHi: prog2DescHi !== undefined ? prog2DescHi.trim() : undefined,
         prog2PriceEn: prog2PriceEn !== undefined ? prog2PriceEn.trim() : undefined,
-        prog2PriceHi: prog2PriceHi !== undefined ? prog2PriceHi.trim() : undefined,
         prog3NameEn: prog3NameEn !== undefined ? prog3NameEn.trim() : undefined,
-        prog3NameHi: prog3NameHi !== undefined ? prog3NameHi.trim() : undefined,
         prog3DescEn: prog3DescEn !== undefined ? prog3DescEn.trim() : undefined,
-        prog3DescHi: prog3DescHi !== undefined ? prog3DescHi.trim() : undefined,
         prog3PriceEn: prog3PriceEn !== undefined ? prog3PriceEn.trim() : undefined,
-        prog3PriceHi: prog3PriceHi !== undefined ? prog3PriceHi.trim() : undefined,
         prog4NameEn: prog4NameEn !== undefined ? prog4NameEn.trim() : undefined,
-        prog4NameHi: prog4NameHi !== undefined ? prog4NameHi.trim() : undefined,
         prog4DescEn: prog4DescEn !== undefined ? prog4DescEn.trim() : undefined,
-        prog4DescHi: prog4DescHi !== undefined ? prog4DescHi.trim() : undefined,
-        prog4PriceEn: prog4PriceEn !== undefined ? prog4PriceEn.trim() : undefined,
-        prog4PriceHi: prog4PriceHi !== undefined ? prog4PriceHi.trim() : undefined
+        prog4PriceEn: prog4PriceEn !== undefined ? prog4PriceEn.trim() : undefined
       }
     });
 

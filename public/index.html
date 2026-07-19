@@ -2139,8 +2139,6 @@
     <a href="#blog" onclick="closeMobileMenu()">Blog</a>
     <a href="#booking" onclick="closeMobileMenu()">Book Now</a>
     <a href="#contact" onclick="closeMobileMenu()">Contact</a>
-    <a href="javascript:void(0)" onclick="toggleLanguage();closeMobileMenu();" id="langToggleBtnMobile"
-      style="color:var(--gold);font-size:28px;margin-top:12px;">English / हिन्दी</a>
     <a href="javascript:void(0)" onclick="handleLogout()" id="userLogoutBtnMobile"
       style="color:#f87171;font-size:28px;margin-top:12px;display:none;">Log Out</a>
     <a href="javascript:void(0)" onclick="showAuthGate()" id="userLoginBtnMobile"
@@ -2156,8 +2154,6 @@
       <li><a href="#pricing">Pricing</a></li>
       <li><a href="#blog">Blog</a></li>
       <li><a href="#contact">Contact</a></li>
-      <li><a href="javascript:void(0)" onclick="toggleLanguage()" id="langToggleBtn"
-          style="color:var(--gold);font-weight:700;">EN | HI</a></li>
       <li><a href="javascript:void(0)" onclick="handleLogout()" id="userLogoutBtn"
           style="color:#f87171;font-weight:700;display:none;">Log Out</a></li>
       <li><a href="javascript:void(0)" onclick="showAuthGate()" id="userLoginBtn"
@@ -3102,48 +3098,7 @@
     let loadedBlogPosts = [];
     window.apexPricingPlans = [];
     window.apexSettings = {};
-    let currentLang = 'EN';
 
-    // Handle English/Hindi Toggle
-    function toggleLanguage() {
-      currentLang = currentLang === 'EN' ? 'HI' : 'EN';
-      updateTranslations();
-    }
-
-    function updateTranslations() {
-      const isHindi = currentLang === 'HI';
-
-      // Hero section translations
-      const heroTitle = isHindi ? (window.apexSettings.heroTitleHi || 'एपेक्स फिटनेस कोचिंग') : (window.apexSettings.heroTitleEn || 'APEX Fitness Coaching');
-      const heroSubtitle = isHindi ? (window.apexSettings.heroSubtitleHi || 'अपने शरीर को बदलें, अपने दिमाग को मजबूत करें।') : (window.apexSettings.heroSubtitleEn || 'Transform your body, build your mind.');
-
-      const heroTitleEl = document.getElementById('heroTitleText');
-      if (heroTitleEl) {
-        heroTitleEl.textContent = heroTitle;
-      }
-
-      const heroSubEl = document.getElementById('heroSubtitleText');
-      if (heroSubEl) {
-        heroSubEl.textContent = heroSubtitle;
-      }
-
-      // About section translations
-      const aboutTextContainer = document.getElementById('aboutTextContainer');
-      if (aboutTextContainer) {
-        const aboutText = isHindi ? (window.apexSettings.aboutTextHi || 'सोनू आम्ब्रे एक प्रमाणित ट्रेनर हैं जिनके पास 8 साल से अधिक का कोचिंग अनुभव है।') : (window.apexSettings.aboutTextEn || 'Coach Sonu Ambre is an IFSA Certified Fitness Coach with over 4 years of experience in both online and offline coaching. He specializes in fat loss, muscle gain, body recomposition, and sustainable lifestyle transformations through personalized training and nutrition plans. Having successfully guided numerous clients toward achieving their fitness goals with proven results, Sonu is committed to helping individuals build strength, confidence, and long-term healthy habits through evidence-based coaching and continuous support.');
-        const paragraphs = aboutText.split('\n\n').filter(p => p.trim() !== '');
-        aboutTextContainer.innerHTML = paragraphs.map(p => `<p>${p.trim()}</p>`).join('');
-      }
-
-      // Language buttons text update
-      const toggleBtn = document.getElementById('langToggleBtn');
-      if (toggleBtn) toggleBtn.textContent = isHindi ? 'EN | हिन्दी' : 'EN | HI';
-      const toggleBtnMobile = document.getElementById('langToggleBtnMobile');
-      if (toggleBtnMobile) toggleBtnMobile.textContent = isHindi ? 'English / हिन्दी' : 'EN / हिन्दी';
-
-      // Rerender lists that depend on language state
-      renderPricing(window.apexPricingPlans || []);
-    }
 
     async function fetchAndPopulate() {
       // 1. Fetch settings
@@ -3238,6 +3193,24 @@
       const heroLabel = document.getElementById('heroLabelText') || document.querySelector('.hero-label');
       if (heroLabel && settings.serviceArea) {
         heroLabel.textContent = settings.serviceArea;
+      }
+
+      // 3. Hero & About English text
+      const heroTitleEl = document.getElementById('heroTitleText');
+      if (heroTitleEl) {
+        heroTitleEl.textContent = settings.heroTitleEn || 'APEX Fitness Coaching';
+      }
+
+      const heroSubEl = document.getElementById('heroSubtitleText');
+      if (heroSubEl) {
+        heroSubEl.textContent = settings.heroSubtitleEn || 'Transform your body, build your mind.';
+      }
+
+      const aboutTextContainer = document.getElementById('aboutTextContainer');
+      if (aboutTextContainer) {
+        const aboutText = settings.aboutTextEn || 'Coach Sonu Ambre is an IFSA Certified Fitness Coach with over 4 years of experience in both online and offline coaching. He specializes in fat loss, muscle gain, body recomposition, and sustainable lifestyle transformations through personalized training and nutrition plans. Having successfully guided numerous clients toward achieving their fitness goals with proven results, Sonu is committed to helping individuals build strength, confidence, and long-term healthy habits through evidence-based coaching and continuous support.';
+        const paragraphs = aboutText.split('\n\n').filter(p => p.trim() !== '');
+        aboutTextContainer.innerHTML = paragraphs.map(p => `<p>${p.trim()}</p>`).join('');
       }
     }
 
@@ -3529,15 +3502,13 @@
       const container = document.getElementById('dynamicPricingGrid');
       if (!container) return;
 
-      const isHindi = currentLang === 'HI';
       const activePlans = plans.filter(p => p.isActive);
 
       container.innerHTML = activePlans.map(p => {
         const isPro = p.name.toLowerCase() === 'pro';
 
-        // Check if Hindi translation exists, otherwise fall back to English
-        const planName = isHindi ? (p.nameHindi || p.name) : p.name;
-        const featuresStr = isHindi ? (p.featuresHindi || p.features) : p.features;
+        const planName = p.name;
+        const featuresStr = p.features;
 
         const featuresList = featuresStr.split('\n').filter(f => f.trim() !== '');
         const vegHtml = p.isVegFriendly ? `<span class="veg-badge" title="Vegetarian Friendly" style="margin-right:8px;vertical-align:middle;display:inline-flex;"></span>` : '';
@@ -3547,20 +3518,20 @@
 
         return `
       <div class="pricing-card ${isPro ? 'highlight' : ''}">
-        ${isPro ? `<div class="pricing-badge">${isHindi ? 'सबसे लोकप्रिय' : 'Most Popular'}</div>` : ''}
+        ${isPro ? `<div class="pricing-badge">Most Popular</div>` : ''}
         <div class="pricing-plan ${isPro ? 'gold' : ''}" style="display:flex;align-items:center;justify-content:center;">
           ${vegHtml} ${escapeHTML(planName)}
         </div>
         <div class="pricing-price"><sup>₹</sup>${Number(p.price).toLocaleString('en-IN')}</div>
-        <div class="pricing-per">${isHindi ? 'प्रति माह' : 'per month'}</div>
+        <div class="pricing-per">per month</div>
         <div class="pricing-gst-label" style="font-size:10px;color:var(--gold-light);text-transform:uppercase;letter-spacing:1px;margin:4px 0 12px 0;height:12px;">
-          ${window.apexSettings.gstNumber ? (isHindi ? 'जीएसटी सहित' : 'Inclusive of GST') : ''}
+          ${window.apexSettings.gstNumber ? 'Inclusive of GST' : ''}
         </div>
         <ul class="pricing-feats">
           ${featuresList.map(f => `<li><span class="feat-check">✓</span> ${escapeHTML(f)}</li>`).join('')}
         </ul>
         <a href="javascript:void(0)" onclick="openCheckoutModal('${p.id}', '${nameParamEscaped}', ${p.price})" class="${isPro ? 'btn-primary' : 'btn-outline'}" style="width:100%;justify-content:center;text-decoration:none;">
-          <span>${isPro ? (isHindi ? 'प्रो चुनें' : 'Choose Pro') : (isHindi ? 'शुरू करें' : `Get Started`)}</span>
+          <span>${isPro ? 'Choose Pro' : 'Get Started'}</span>
         </a>
       </div>
     `;
@@ -3574,12 +3545,11 @@
       const container = document.getElementById('dynamicBlogGrid');
       if (!container) return;
 
-      const isHindi = currentLang === 'HI';
       const livePosts = posts.filter(p => p.status === 'published');
       if (livePosts.length === 0) {
         container.innerHTML = `
       <div style="grid-column:1/-1;text-align:center;color:var(--gray3);padding:40px;">
-        ${isHindi ? 'अभी तक कोई लेख प्रकाशित नहीं हुआ है।' : 'No articles published yet. Check back soon!'}
+        No articles published yet. Check back soon!
       </div>
     `;
         return;
@@ -3610,7 +3580,7 @@
               ${new Date(p.createdAt).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}
             </span>
             <button onclick="readFullBlogPost('${p.id}')" style="background:none;border:none;color:var(--gold);font-size:12px;font-weight:700;cursor:pointer;text-transform:uppercase;letter-spacing:1px;">
-              ${isHindi ? 'लेख पढ़ें →' : 'Read Article →'}
+              Read Article →
             </button>
           </div>
         </div>
@@ -3664,9 +3634,8 @@
       selectedPlanName = name;
       selectedPlanPrice = price;
 
-      const isHindi = currentLang === 'HI';
-      document.getElementById('checkoutPlanName').textContent = isHindi ? `योजना में शामिल हों: ${name}` : `Request to Join ${name} Plan`;
-      document.getElementById('checkoutPlanPrice').textContent = isHindi ? `सोनू जल्द ही आपसे संपर्क करेंगे।` : `Sonu will reach out to you shortly to get you started.`;
+      document.getElementById('checkoutPlanName').textContent = `Request to Join ${name} Plan`;
+      document.getElementById('checkoutPlanPrice').textContent = `Sonu will reach out to you shortly to get you started.`;
 
       document.getElementById('checkoutClientName').value = "";
       document.getElementById('checkoutClientEmail').value = "";
@@ -3704,8 +3673,6 @@
         document.getElementById('checkoutPhoneError').style.display = 'none';
       }
 
-      const isHindi = currentLang === 'HI';
-
       try {
         const res = await fetch(API_BASE + '/api/inquiries', {
           method: 'POST',
@@ -3725,9 +3692,7 @@
         // Transition modal to success view
         document.getElementById('checkoutFormContent').style.display = 'none';
         
-        const successMsg = isHindi 
-          ? 'धन्यवाद! सोनू जल्द ही आपसे संपर्क करेंगे।'
-          : 'Thanks! Sonu will reach out to you shortly to get you started.';
+        const successMsg = 'Thanks! Sonu will reach out to you shortly to get you started.';
         document.getElementById('checkoutSuccessMessage').textContent = successMsg;
         document.getElementById('checkoutSuccessContent').style.display = 'block';
       } catch (err) {

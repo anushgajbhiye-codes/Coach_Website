@@ -20,8 +20,7 @@ async function main() {
         whatsapp: '+91 98765 43210',
         serviceArea: 'Personal Training available in Mumbai • Online Coaching Across India',
         seasonalBannerText: 'Wedding Season Special: Get ₹1,500 off on all coaching plans!',
-        aboutTextEn: 'Coach Sonu Ambre is an IFSA Certified Fitness Coach with over 4 years of experience in both online and offline coaching. He specializes in fat loss, muscle gain, body recomposition, and sustainable lifestyle transformations through personalized training and nutrition plans. Having successfully guided numerous clients toward achieving their fitness goals with proven results, Sonu is committed to helping individuals build strength, confidence, and long-term healthy habits through evidence-based coaching and continuous support.',
-        aboutTextHi: 'सोनू आम्ब्रे एक प्रमाणित ट्रेनर हैं जिनके पास 8 साल से अधिक का कोचिंग अनुभव है। उनकी संरचित ऑनलाइन विधियों ने सैकड़ों ग्राहकों को निरंतर वसा हानि, मांसपेशियों के निर्माण और चरम शारीरिक परिवर्तन प्राप्त करने में मदद की है।'
+        aboutTextEn: 'Coach Sonu Ambre is an IFSA Certified Fitness Coach with over 4 years of experience in both online and offline coaching. He specializes in fat loss, muscle gain, body recomposition, and sustainable lifestyle transformations through personalized training and nutrition plans. Having successfully guided numerous clients toward achieving their fitness goals with proven results, Sonu is committed to helping individuals build strength, confidence, and long-term healthy habits through evidence-based coaching and continuous support.'
       }
     });
   } else {
@@ -52,11 +51,8 @@ async function main() {
         seasonalBannerText: 'Wedding Season Special: Get ₹1,500 off on all coaching plans!',
         seasonalBannerDiscount: 1500,
         heroTitleEn: 'APEX Fitness Coaching',
-        heroTitleHi: 'एपेक्स फिटनेस कोचिंग',
         heroSubtitleEn: 'Built from grit, refined by science.',
-        heroSubtitleHi: 'साहस से निर्मित, विज्ञान द्वारा परिष्कृत।',
-        aboutTextEn: 'Coach Sonu Ambre is an IFSA Certified Fitness Coach with over 4 years of experience in both online and offline coaching. He specializes in fat loss, muscle gain, body recomposition, and sustainable lifestyle transformations through personalized training and nutrition plans. Having successfully guided numerous clients toward achieving their fitness goals with proven results, Sonu is committed to helping individuals build strength, confidence, and long-term healthy habits through evidence-based coaching and continuous support.',
-        aboutTextHi: 'सोनू आम्ब्रे एक प्रमाणित ट्रेनर हैं जिनके पास 8 साल से अधिक का कोचिंग अनुभव है। उनकी संरचित ऑनलाइन विधियों ने सैकड़ों ग्राहकों को निरंतर वसा हानि, मांसपेशियों के निर्माण और चरम शारीरिक परिवर्तन प्राप्त करने में मदद की है।'
+        aboutTextEn: 'Coach Sonu Ambre is an IFSA Certified Fitness Coach with over 4 years of experience in both online and offline coaching. He specializes in fat loss, muscle gain, body recomposition, and sustainable lifestyle transformations through personalized training and nutrition plans. Having successfully guided numerous clients toward achieving their fitness goals with proven results, Sonu is committed to helping individuals build strength, confidence, and long-term healthy habits through evidence-based coaching and continuous support.'
       }
     });
   }
@@ -186,8 +182,6 @@ async function main() {
         features: 'Custom workout plan\nNutrition framework\nWeekly check-in\nApp access',
         isActive: true,
         isVegFriendly: true,
-        nameHindi: 'बेसिक',
-        featuresHindi: 'कस्टम वर्कआउट प्लान\nपोषण ढांचा\nसाप्ताहिक चेक-इन\nऐप एक्सेस',
       },
       {
         name: 'Pro',
@@ -195,8 +189,6 @@ async function main() {
         features: 'Custom workout plan\nCustom macro targets\n2× weekly check-ins\nApp access + logs\nDirect WhatsApp\nVideo form review',
         isActive: true,
         isVegFriendly: false,
-        nameHindi: 'प्रो',
-        featuresHindi: 'कस्टम वर्कआउट प्लान\nकस्टम मैक्रो लक्ष्य\nसप्ताह में दो बार चेक-इन\nऐप एक्सेस + लॉग्स\nसीधा व्हाट्सएप\nवीडियो फॉर्म समीक्षा',
       },
     ];
     for (const p of pricingPlansData) {

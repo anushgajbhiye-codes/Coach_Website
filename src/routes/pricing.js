@@ -33,7 +33,7 @@ router.get('/', async (req, res, next) => {
 router.put('/:id', authenticateToken, async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { name, nameHindi, price, features, featuresHindi, isActive, isVegFriendly } = req.body;
+    const { name, price, features, isActive, isVegFriendly } = req.body;
 
     const existing = await prisma.pricingPlan.findUnique({ where: { id } });
     if (!existing) return res.status(404).json({ error: 'Pricing plan not found.' });
@@ -42,10 +42,8 @@ router.put('/:id', authenticateToken, async (req, res, next) => {
       where: { id },
       data: {
         name: name !== undefined ? name.trim() : existing.name,
-        nameHindi: nameHindi !== undefined ? nameHindi.trim() : existing.nameHindi,
         price: price !== undefined ? parseInt(price) : existing.price,
         features: features !== undefined ? features.trim() : existing.features,
-        featuresHindi: featuresHindi !== undefined ? featuresHindi.trim() : existing.featuresHindi,
         isActive: isActive !== undefined ? (isActive === 'true' || isActive === true) : existing.isActive,
         isVegFriendly: isVegFriendly !== undefined ? (isVegFriendly === 'true' || isVegFriendly === true) : existing.isVegFriendly
       }

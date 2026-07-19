@@ -1,6 +1,6 @@
 const sharp = require("sharp");
 const streamifier = require("streamifier");
-const cloudinary = require("../../config/cloudinary");
+const cloudinary = require("../../Config/cloudinary");
 
 async function uploadToCloudinary(file, folder) {
     if (!file) return null;
