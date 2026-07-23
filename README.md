@@ -59,14 +59,6 @@ npm start
 Once started, access the pages at:
 - **Public Website**: [http://localhost:5000/](http://localhost:5000/)
 - **Coach Admin Dashboard**: [http://localhost:5000/admin.html](http://localhost:5000/admin.html)
-
----
-
-## 🔑 Coach Authentication Credentials
-Use the following credentials to log in to the Coach Admin panel at `admin.html`:
-- **Email**: `sonu@apexcoaching.in`
-- **Password**: `Sonu@1234`
-
 ---
 
 ## 💡 Key Features Implemented
